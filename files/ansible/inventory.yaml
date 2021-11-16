@@ -1,0 +1,13 @@
+---
+all:
+  children:
+    firewalls:
+      hosts:
+        juniper-srx-garage0:
+    switches:
+      hosts:
+        juniper-ex-garage0:
+        juniper-ex-garage1:
+        juniper-ex-garage2:
+        juniper-ex-closet0:
+        juniper-ex-office0:

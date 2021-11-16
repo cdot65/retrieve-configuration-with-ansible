@@ -1,0 +1,4 @@
+vendor: "Cisco Systems"
+ansible_network_os: cisco.ios.ios
+ansible_user: automation
+ansible_password: juniper123

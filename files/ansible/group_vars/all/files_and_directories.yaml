@@ -1,0 +1,9 @@
+---
+### -------------------------------------------------
+### DIRECTORIES TO BE USED IN JUNIPER_STANZA ROLES
+### -------------------------------------------------
+# directories to hold configuration files as they're generated
+backup_directory: "config/backup/"
+device_backup_directory: "{{ backup_directory }}/{{ inventory_hostname }}"
+backup_file: "{{ device_backup_directory }}/{{ ansible_date_time.date }}_{{ inventory_hostname }}.conf"
+backup_file_yaml: "{{ device_backup_directory }}/{{ ansible_date_time.date }}_{{ inventory_hostname }}.yaml"

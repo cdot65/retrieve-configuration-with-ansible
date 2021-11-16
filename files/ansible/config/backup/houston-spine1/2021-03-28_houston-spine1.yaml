@@ -1,0 +1,290 @@
+configuration:
+  '@commit_localtime': 2021-03-29 00:36:57 UTC
+  '@commit_seconds': '1616978217'
+  '@commit_user': root
+  forwarding_options:
+    storm_control_profiles:
+      all: null
+      name: default
+  interfaces:
+    interface:
+    - description: '[xe-0/0/0] houston-leaf1:xe-0/0/0'
+      mtu: '9216'
+      name: xe-0/0/0
+      unit:
+        family:
+          inet:
+            address:
+              name: 172.16.1.0/31
+          iso: null
+        name: '0'
+    - description: '[xe-0/0/1] houston-leaf2:xe-0/0/1'
+      mtu: '9216'
+      name: xe-0/0/1
+      unit:
+        family:
+          inet:
+            address:
+              name: 172.16.1.2/31
+          iso: null
+        name: '0'
+    - description: '[xe-0/0/3] houston-leaf4:xe-0/0/3'
+      mtu: '9216'
+      name: xe-0/0/3
+      unit:
+        family:
+          inet:
+            address:
+              name: 172.16.1.6/31
+          iso: null
+        name: '0'
+    - description: '[xe-0/0/4] houston-leaf3:xe-0/0/4'
+      mtu: '9216'
+      name: xe-0/0/4
+      unit:
+        family:
+          inet:
+            address:
+              name: 172.16.1.4/31
+          iso: null
+        name: '0'
+    - name: em0
+      unit:
+        family:
+          inet:
+            address:
+              name: 192.168.105.41/24
+        name: '0'
+    - name: em1
+      unit:
+        family:
+          inet:
+            address:
+              name: 169.254.0.2/24
+        name: '0'
+    - name: lo0
+      unit:
+        family:
+          inet:
+            address:
+              name: 10.255.1.1/32
+          iso:
+            address:
+              name: 49.0001.0010.0255.0001.0001.00
+        name: '0'
+  policy_options:
+    policy_statement:
+    - name: AllPodNetworks
+      term:
+        from:
+          family: inet
+          protocol: direct
+        name: AllPodNetworks-10
+        then:
+          accept: null
+    - name: BGP-AOS-Policy
+      term:
+      - from:
+          policy: AllPodNetworks
+        name: BGP-AOS-Policy-10
+        then:
+          accept: null
+      - name: BGP-AOS-Policy-30
+        then:
+          accept: null
+    - name: DEFAULT_DENY
+      term:
+        name: DEFAULT_DENY-10
+        then:
+          reject: null
+    - name: PFE-LB
+      then:
+        load_balance:
+          per_packet: null
+  protocols:
+    bgp:
+      graceful_restart: null
+      group:
+        multihop:
+          no_nexthop_change: null
+          ttl: '1'
+        multipath:
+          multiple_as: null
+        name: l3clos-s-evpn
+        neighbor:
+        - description: houston-leaf1-evpn-overlay
+          family:
+            evpn:
+              signaling: null
+          local_address: 10.255.1.1
+          name: 10.255.1.11
+          peer_as: '65011'
+        - description: houston-leaf2-evpn-overlay
+          family:
+            evpn:
+              signaling: null
+          local_address: 10.255.1.1
+          name: 10.255.1.12
+          peer_as: '65012'
+        - description: houston-leaf3-evpn-overlay
+          family:
+            evpn:
+              signaling: null
+          local_address: 10.255.1.1
+          name: 10.255.1.13
+          peer_as: '65013'
+        - description: houston-leaf4-evpn-overlay
+          family:
+            evpn:
+              signaling: null
+          local_address: 10.255.1.1
+          name: 10.255.1.14
+          peer_as: '65014'
+        type: external
+      log_updown: null
+      multipath: null
+    igmp_snooping:
+      vlan:
+        name: default
+    isis:
+      export: ( BGP-AOS-Policy || DEFAULT_DENY )
+      interface:
+      - hello_padding_type: disable
+        name: xe-0/0/0.0
+        point_to_point: null
+      - hello_padding_type: disable
+        name: xe-0/0/1.0
+        point_to_point: null
+      - hello_padding_type: disable
+        name: xe-0/0/3.0
+        point_to_point: null
+      - hello_padding_type: disable
+        name: xe-0/0/4.0
+        point_to_point: null
+      - name: lo0.0
+        passive: null
+      level:
+      - disable: null
+        name: '1'
+      - name: '2'
+        prefix_export_limit: '20000'
+        wide_metrics_only: null
+      lsp_lifetime: '65535'
+      reference_bandwidth: 1000g
+    lldp:
+      interface:
+        name: all
+      neighbour_port_info_display: port-id
+      port_description_type: interface-description
+      port_id_subtype: interface-name
+    rstp:
+      disable: null
+  routing_options:
+    autonomous_system:
+      as_number: '65002'
+    forwarding_table:
+      ecmp_fast_reroute: null
+      export: PFE-LB
+    router_id: 10.255.1.1
+    static:
+      route:
+      - name: 192.168.101.0/24
+        next_hop: 192.168.105.1
+      - name: 192.168.102.0/24
+        next_hop: 192.168.105.1
+      - name: 192.168.103.0/24
+        next_hop: 192.168.105.1
+      - name: 192.168.104.0/24
+        next_hop: 192.168.105.1
+      - name: 10.9.0.0/16
+        next_hop: 192.168.105.1
+  snmp:
+    community:
+    - authorization: read-only
+      name: public
+    - authorization: read-only
+      clients:
+        name: 0.0.0.0/0
+      name: healthbot
+    trap_group:
+      categories:
+        chassis: null
+        routing: null
+      name: SNMP_TRAP
+      targets:
+        name: 192.168.105.77
+      version: v2
+    trap_options:
+      source_address:
+        address: 192.168.105.20
+  system:
+    extensions:
+      providers:
+      - license_type:
+          deployment_scope: commercial
+          name: juniper
+        name: juniper
+      - license_type:
+          deployment_scope: commercial
+          name: juniper
+        name: chef
+    host_name: houston-spine1
+    login:
+      user:
+      - authentication:
+          encrypted_password: $6$Pubb7bDL$hxt6.fNQfeknsrA9o6aW89BgwTIYx962Lxb3O5na0Ykj9SCjH6ePki71PERR7A8fxte27NJEsehzFIVz3rBhG/
+        class: super-user
+        name: automation
+        uid: '2001'
+      - authentication:
+          ssh_rsa:
+            name: ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEA6NF8iallvQVp22WDkTkyrtvp9eWW6A8YVr+kz4TjGYe7gHzIw+niNltGEFHzD8+v1I2YJ6oXevct1YeS0o9HZyN1Q9qgCgzUFtdOKLv6IedplqoPkcmF0aYet2PkEDo3MlTBckFXPITAMzF8dJSIFo9D8HfdOV0IAdx4O7PtixWKn5y2hMNG0zQPyUecp4pzC6kivAIhyfHilFR61RGL+GPXQ2MWZWFYbAGjyiYJnAmCP3NOTd0jMZEnDkbUvxhMmBYSdETk1rRgm+R4LOzFUGaHqHDLKLX+FIPKcF96hrucXzcWyLbIbEgE98OHlnVYCzRdK8jlqm8tehUc9c9WhQ== vagrant insecure public key
+        class: super-user
+        name: vagrant
+        uid: '2000'
+    root_authentication:
+      encrypted_password: $6$W0N6t7fV$.B4uhCIFzP4JhPyohFJVR6Ntbsvpj3BL.glw81gwGqKcT2GsUli1AD1D1oWa6hn0sSWZpi/Y1E9GAU9f3kCqV/
+      ssh_rsa:
+        name: ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEA6NF8iallvQVp22WDkTkyrtvp9eWW6A8YVr+kz4TjGYe7gHzIw+niNltGEFHzD8+v1I2YJ6oXevct1YeS0o9HZyN1Q9qgCgzUFtdOKLv6IedplqoPkcmF0aYet2PkEDo3MlTBckFXPITAMzF8dJSIFo9D8HfdOV0IAdx4O7PtixWKn5y2hMNG0zQPyUecp4pzC6kivAIhyfHilFR61RGL+GPXQ2MWZWFYbAGjyiYJnAmCP3NOTd0jMZEnDkbUvxhMmBYSdETk1rRgm+R4LOzFUGaHqHDLKLX+FIPKcF96hrucXzcWyLbIbEgE98OHlnVYCzRdK8jlqm8tehUc9c9WhQ== vagrant insecure public key
+    services:
+      extension_service:
+        notification:
+          allow_clients:
+            address: 0.0.0.0/0
+        request_response:
+          grpc:
+            max_connections: '30'
+            undocumented:
+            - clear_text: null
+            - skip_authentication: null
+      netconf:
+        ssh: null
+      rest:
+        enable_explorer: null
+        http:
+          port: '8080'
+      ssh:
+        root_login: allow
+      telnet: null
+    syslog:
+      file:
+      - contents:
+        - name: any
+          notice: null
+        - info: null
+          name: authorization
+        name: messages
+      - contents:
+          any: null
+          name: interactive-commands
+        name: interactive-commands
+      user:
+        contents:
+          emergency: null
+          name: any
+        name: '*'
+  version: 20191212.201431_builder.r1074901
+  vlans:
+    vlan:
+      name: default
+      vlan_id: '1'

@@ -1,0 +1,316 @@
+configuration:
+  '@commit_localtime': 2021-03-13 02:00:12 UTC
+  '@commit_seconds': '1615600812'
+  '@commit_user': automation
+  access:
+    address_assignment:
+      pool:
+      - family:
+          inet:
+            dhcp_attributes:
+              router:
+                name: 10.2.10.1
+            network: 10.2.10.0/24
+            range:
+              high: 10.2.10.254
+              low: 10.2.10.2
+              name: range10
+        name: pool10
+      - family:
+          inet:
+            dhcp_attributes:
+              router:
+                name: 10.2.20.1
+            network: 10.2.20.0/24
+            range:
+              high: 10.2.20.254
+              low: 10.2.20.2
+              name: range20
+        name: pool20
+      - family:
+          inet:
+            dhcp_attributes:
+              router:
+                name: 10.2.30.1
+            network: 10.2.30.0/24
+            range:
+              high: 10.2.30.254
+              low: 10.2.30.2
+              name: range30
+        name: pool30
+  apply_groups: ${node}
+  chassis:
+    cluster:
+      redundancy_group:
+      - name: '0'
+        node:
+        - name: '0'
+          priority: '100'
+        - name: '1'
+          priority: '1'
+      - gratuitous_arp_count: '4'
+        name: '1'
+        node:
+        - name: '0'
+          priority: '100'
+        - name: '1'
+          priority: '1'
+        preempt: null
+      - gratuitous_arp_count: '4'
+        name: '2'
+        node:
+        - name: '1'
+          priority: '100'
+        - name: '0'
+          priority: '1'
+        preempt: null
+      reth_count: '3'
+  groups:
+  - interfaces:
+      interface:
+        name: fxp0
+        unit:
+          family:
+            inet:
+              address:
+              - name: 192.168.105.203/24
+              - master_only: null
+                name: 192.168.105.202/24
+          name: '0'
+    name: node0
+    system:
+      host_name: node0
+  - interfaces:
+      interface:
+        name: fxp0
+        unit:
+          family:
+            inet:
+              address:
+              - name: 192.168.105.204/24
+              - master_only: null
+                name: 192.168.105.202/24
+          name: '0'
+    name: node1
+    system:
+      host_name: node1
+  interfaces:
+    interface:
+    - gigether_options:
+        redundant_parent:
+          parent: reth2
+      name: ge-0/0/5
+    - gigether_options:
+        redundant_parent:
+          parent: reth1
+      name: ge-0/0/7
+    - gigether_options:
+        redundant_parent:
+          parent: reth2
+      name: ge-1/0/5
+    - gigether_options:
+        redundant_parent:
+          parent: reth1
+      name: ge-1/0/7
+    - fabric_options:
+        member_interfaces:
+          name: ge-0/0/2
+      name: fab0
+    - fabric_options:
+        member_interfaces:
+          name: ge-1/0/2
+      name: fab1
+    - name: irb
+      unit:
+        family:
+          inet:
+            address:
+              name: 192.168.1.1/24
+        name: '0'
+    - name: lo0
+      unit:
+        family:
+          inet:
+            address:
+              name: 192.168.255.202/32
+        name: '0'
+    - mtu: '9000'
+      name: reth1
+      redundant_ether_options:
+        redundancy_group: '1'
+      unit:
+        family:
+          inet:
+            address:
+              name: 190.221.165.1/31
+          mpls: null
+        name: '0'
+    - flexible_vlan_tagging: null
+      name: reth2
+      redundant_ether_options:
+        redundancy_group: '2'
+      unit:
+      - description: PC vlan
+        family:
+          inet:
+            address:
+              name: 10.2.10.1/24
+        name: '10'
+        vlan_id: '10'
+      - description: Voice vlan
+        family:
+          inet:
+            address:
+              name: 10.2.20.1/24
+        name: '20'
+        vlan_id: '20'
+      - description: Network vlan
+        family:
+          inet:
+            address:
+              name: 10.2.30.1/24
+        name: '30'
+        vlan_id: '30'
+  policy_options:
+    policy_statement:
+      name: branch2_lan
+      term:
+        from:
+          route_filter:
+            address: 10.2.0.0/16
+            exact: null
+        name: '1'
+        then:
+          accept: null
+  protocols:
+    lldp:
+      interface:
+        name: all
+    ospf:
+      area:
+        interface:
+        - name: lo0.0
+          passive: null
+        - name: reth1.0
+        name: 0.0.0.0
+  routing_instances:
+    instance:
+      instance_type: vrf
+      interface:
+      - name: reth2.10
+      - name: reth2.20
+      - name: reth2.30
+      name: branch2
+      route_distinguisher:
+        rd_type: 192.168.255.202:100
+      vrf_table_label: null
+      vrf_target:
+        community: target:192.168.255.220:100
+  routing_options:
+    autonomous_system:
+      as_number: '65432'
+    static:
+      route:
+      - name: 10.9.0.0/16
+        next_hop: 192.168.105.1
+      - name: 192.168.101.0/24
+        next_hop: 192.168.105.1
+      - name: 192.168.103.0/24
+        next_hop: 192.168.105.1
+      - name: 192.168.104.0/24
+        next_hop: 192.168.105.1
+  security:
+    forwarding_options:
+      family:
+        mpls:
+          mode: flow-based
+    screen:
+      ids_option:
+        icmp:
+          ping_death: null
+        ip:
+          source_route_option: null
+          tear_drop: null
+        name: untrust-screen
+        tcp:
+          land: null
+          syn_flood:
+            alarm_threshold: '1024'
+            attack_threshold: '200'
+            destination_threshold: '2048'
+            source_threshold: '1024'
+            timeout: '20'
+    zones:
+      security_zone:
+      - host_inbound_traffic:
+          protocols:
+            name: all
+          system_services:
+            name: all
+        interfaces:
+          name: reth1.0
+        name: mpls_wan
+      - host_inbound_traffic:
+          protocols:
+            name: all
+          system_services:
+            name: all
+        interfaces:
+        - name: reth2.10
+        - name: reth2.20
+        - name: reth2.30
+        name: trust
+  system:
+    host_name: dallas-fw1
+    login:
+      user:
+        authentication:
+          encrypted_password: $6$shn/zoUR$jswkiRolE9FK/EdR66je.4cyQhJTg/KZ5Dxl6A.anFuBxsGwHa.TEe3SAIhV1RQYezFiN3dqKNlVyM3H69Nng0
+        class: super-user
+        name: automation
+        uid: '2000'
+    max_configuration_rollbacks: '5'
+    max_configurations_on_flash: '5'
+    name_server:
+    - name: 8.8.8.8
+    - name: 8.8.4.4
+    root_authentication:
+      encrypted_password: $6$27xOk0qk$3bEyYTJ7.cn2GRUDnsYAJuLRPFg4gjANDjo0sHKzX0kR1jVe52mLsR4KkJU8RoEfTvR./r00cuG5Rj/336/.50
+    services:
+      dhcp_local_server:
+        group:
+        - interface:
+            name: irb.0
+          name: jdhcp-group
+        - interface:
+          - name: reth2.10
+          - name: reth2.20
+          - name: reth2.30
+          name: branch2
+      netconf:
+        ssh: null
+      ssh: null
+      web_management:
+        https:
+          system_generated_certificate: null
+    syslog:
+      archive:
+        files: '3'
+        size: 100k
+      file:
+      - contents:
+        - name: any
+          notice: null
+        - info: null
+          name: authorization
+        name: messages
+      - contents:
+          any: null
+          name: interactive-commands
+        name: interactive-commands
+      user:
+        contents:
+          emergency: null
+          name: any
+        name: '*'
+  version: 19.4R3-S1.3

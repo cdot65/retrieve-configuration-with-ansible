@@ -1,0 +1,390 @@
+configuration:
+  '@commit_localtime': 2021-02-23 12:50:23 UTC
+  '@commit_seconds': '1614084623'
+  '@commit_user': automation
+  apply_groups: ${node}
+  firewall:
+    family:
+      mpls:
+        filter:
+          name: MPLS
+          term:
+            name: '1'
+            then:
+              packet_mode: null
+  interfaces:
+    interface:
+    - name: ge-0/0/0
+      unit:
+        family:
+          inet:
+            address:
+              name: 192.168.105.210/24
+        name: '0'
+    - flexible_vlan_tagging: null
+      mtu: '9000'
+      name: ge-0/0/5
+      promiscuous_mode: null
+      unit:
+      - description: PC vlan
+        family:
+          inet:
+            address:
+              name: 10.1.10.1/24
+        name: '10'
+        vlan_id: '10'
+      - description: Voice vlan
+        family:
+          inet:
+            address:
+              name: 10.1.20.1/24
+        name: '20'
+        vlan_id: '20'
+      - description: Network vlan
+        family:
+          inet:
+            address:
+              name: 10.1.30.1/24
+        name: '30'
+        vlan_id: '30'
+    - mtu: '9000'
+      name: ge-0/0/7
+      unit:
+        family:
+          inet:
+            address:
+              name: 74.51.192.1/31
+          mpls:
+            filter:
+              input: MPLS
+        name: '0'
+    - dialer_options:
+        pool:
+          name: '1'
+          priority: '100'
+      name: cl-1/0/0
+    - name: dl0
+      unit:
+        dialer_options:
+          always_on: null
+          dial_string: '1234'
+          pool: '1'
+        family:
+          inet:
+            negotiate_address: null
+          inet6:
+            negotiate_address: null
+        name: '0'
+    - name: lo0
+      unit:
+        family:
+          inet:
+            address:
+              name: 192.168.255.210/32
+        name: '0'
+  policy_options:
+    policy_statement:
+      name: branch1_lan
+      term:
+        from:
+          route_filter:
+            address: 10.1.0.0/16
+            exact: null
+        name: '1'
+        then:
+          accept: null
+  protocols:
+    bgp:
+      group:
+        family:
+          inet_vpn:
+            unicast: null
+        local_address: 192.168.255.210
+        name: mpls_wan
+        neighbor:
+        - name: 192.168.255.200
+        - name: 192.168.255.220
+        type: internal
+    ldp:
+      interface:
+      - name: ge-0/0/7.0
+      - name: lo0.0
+    lldp:
+      interface:
+        name: all
+    mpls:
+      interface:
+        name: ge-0/0/7.0
+    ospf:
+      area:
+        interface:
+        - name: lo0.0
+          passive: null
+        - interface_type: p2p
+          name: ge-0/0/7.0
+        name: 0.0.0.0
+  routing_instances:
+    instance:
+      access:
+        address_assignment:
+          pool:
+          - family:
+              inet:
+                dhcp_attributes:
+                  domain_name: lonestar.com
+                  name_server:
+                  - name: 1.1.1.1
+                  - name: 8.8.8.8
+                  router:
+                    name: 10.1.10.1
+                host:
+                  hardware_address: 08:b2:58:a5:9c:a2
+                  ip_address: 10.1.10.254
+                  name: branch1-sw0
+                network: 10.1.10.0/24
+                range:
+                  high: 10.1.10.200
+                  low: 10.1.10.100
+                  name: range10
+            name: pool10
+          - family:
+              inet:
+                dhcp_attributes:
+                  domain_name: lonestar.com
+                  name_server:
+                  - name: 1.1.1.1
+                  - name: 8.8.8.8
+                  router:
+                    name: 10.1.20.1
+                host:
+                  hardware_address: 08:b2:58:a5:9c:a2
+                  ip_address: 10.1.20.254
+                  name: branch1-sw0
+                network: 10.1.20.0/24
+                range:
+                  high: 10.1.20.200
+                  low: 10.1.20.100
+                  name: range20
+            name: pool20
+          - family:
+              inet:
+                dhcp_attributes:
+                  domain_name: lonestar.com
+                  name_server:
+                  - name: 1.1.1.1
+                  - name: 8.8.8.8
+                  router:
+                    name: 10.1.30.1
+                host:
+                  hardware_address: 08:b2:58:a5:9c:a2
+                  ip_address: 10.1.30.254
+                  name: branch1-sw0
+                network: 10.1.30.0/24
+                range:
+                  high: 10.1.30.200
+                  low: 10.1.30.100
+                  name: range30
+            name: pool30
+      instance_type: vrf
+      interface:
+      - name: ge-0/0/5.10
+      - name: ge-0/0/5.20
+      - name: ge-0/0/5.30
+      name: branch1
+      route_distinguisher:
+        rd_type: 192.168.255.210:100
+      system:
+        services:
+          dhcp_local_server:
+            group:
+              interface:
+              - name: ge-0/0/5.10
+              - name: ge-0/0/5.20
+              - name: ge-0/0/5.30
+              name: branch1
+      vrf_table_label: null
+      vrf_target:
+        community: target:65000:100
+  routing_options:
+    autonomous_system:
+      as_number: '65000'
+    static:
+      route:
+      - name: 10.9.0.0/16
+        next_hop: 192.168.105.1
+      - name: 192.168.101.0/24
+        next_hop: 192.168.105.1
+      - name: 192.168.103.0/24
+        next_hop: 192.168.105.1
+      - name: 192.168.104.0/24
+        next_hop: 192.168.105.1
+  security:
+    forwarding_options:
+      family:
+        mpls:
+          mode: flow-based
+    nat:
+      source:
+        rule_set:
+          from:
+            zone: trust
+          name: trust-to-mgmt
+          rule:
+            name: source-nat-rule
+            src_nat_rule_match:
+              source_address: 0.0.0.0/0
+            then:
+              source_nat:
+                interface: null
+          to:
+            zone: mgmt
+    policies:
+      policy:
+      - from_zone_name: trust
+        policy:
+          match:
+            application: any
+            destination_address: any
+            source_address: any
+          name: trust-to-trust
+          then:
+            permit: null
+        to_zone_name: trust
+      - from_zone_name: mpls_wan
+        policy:
+          match:
+            application: any
+            destination_address: any
+            source_address: any
+          name: mpls_wan-mpls_wan
+          then:
+            permit: null
+        to_zone_name: mpls_wan
+      - from_zone_name: trust
+        policy:
+          match:
+            application: any
+            destination_address: any
+            source_address: any
+          name: trust-to-mpls_wan
+          then:
+            permit: null
+        to_zone_name: mpls_wan
+      - from_zone_name: mpls_wan
+        policy:
+          match:
+            application: any
+            destination_address: any
+            source_address: any
+          name: mpls_wan-trust
+          then:
+            permit: null
+        to_zone_name: trust
+    screen:
+      ids_option:
+        icmp:
+          ping_death: null
+        ip:
+          source_route_option: null
+          tear_drop: null
+        name: mgmt-screen
+        tcp:
+          land: null
+          syn_flood:
+            alarm_threshold: '1024'
+            attack_threshold: '200'
+            destination_threshold: '2048'
+            source_threshold: '1024'
+            timeout: '20'
+    zones:
+      security_zone:
+      - host_inbound_traffic:
+          protocols:
+            name: all
+          system_services:
+            name: all
+        interfaces:
+        - name: ge-0/0/5.10
+        - name: ge-0/0/5.20
+        - name: ge-0/0/5.30
+        name: trust
+      - interfaces:
+        - host_inbound_traffic:
+            system_services:
+              name: tftp
+          name: dl0.0
+        - host_inbound_traffic:
+            system_services:
+              name: all
+          name: ge-0/0/0.0
+        name: mgmt
+        screen: mgmt-screen
+      - host_inbound_traffic:
+          protocols:
+            name: all
+          system_services:
+            name: all
+        interfaces:
+        - name: ge-0/0/7.0
+        - name: lo0.0
+        name: mpls_wan
+  system:
+    host_name: branch1-fw0
+    license:
+      undocumented:
+        autoupdate:
+          url:
+            name: https://ae1.juniper.net/junos/key_retrieval
+    login:
+      user:
+        authentication:
+          encrypted_password: $6$AeKw/rzH$wue0g/86xmHGak//jIQ7pJRBa3zwW/Tlb8mUpY7G7UAQulXhht.AtzYzyROtV0S1w0ndO./ZS8GFzV/5F8vTq.
+        class: super-user
+        name: automation
+        uid: '2000'
+    max_configuration_rollbacks: '5'
+    max_configurations_on_flash: '5'
+    name_server:
+    - name: 8.8.8.8
+    - name: 8.8.4.4
+    phone_home:
+      rfc_compliant: null
+      server: https://redirect.juniper.net
+    root_authentication:
+      encrypted_password: $6$OSridi4g$jSjgv9K38Gg9ndxv93tteGhz0ZVAUHUcDf18Hi2qjcjJDwSdNPo1eQlLH34bxlTItX5gl17F2oxDHxHp5Dbv/1
+    services:
+      dhcp_local_server:
+        group:
+          interface:
+          - name: ge-0/0/5.10
+          - name: ge-0/0/5.20
+          - name: ge-0/0/5.30
+          name: branch1
+      netconf:
+        ssh: null
+      ssh:
+        root_login: allow
+      web_management:
+        https:
+          system_generated_certificate: null
+    syslog:
+      archive:
+        files: '3'
+        size: 100k
+      file:
+      - contents:
+        - name: any
+          notice: null
+        - info: null
+          name: authorization
+        name: messages
+      - contents:
+          any: null
+          name: interactive-commands
+        name: interactive-commands
+      user:
+        contents:
+          emergency: null
+          name: any
+        name: '*'
+  version: 19.4R3-S1.3

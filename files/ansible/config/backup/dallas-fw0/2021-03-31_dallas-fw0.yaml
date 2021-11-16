@@ -1,0 +1,817 @@
+configuration:
+  '@commit_localtime': 2021-03-30 09:44:00 CDT
+  '@commit_seconds': '1617115440'
+  '@commit_user': root
+  applications:
+    application_set:
+      application:
+      - name: junos-icmp-ping
+      - name: junos-ping
+      - name: junos-ssh
+      name: FIREWALL_MANAGEMENT
+  apply_groups:
+  - mist-script
+  - mist-wa
+  chassis:
+    aggregated_devices:
+      ethernet:
+        device_count: '8'
+  firewall:
+    family:
+      mpls:
+        filter:
+          name: MPLS
+          term:
+            name: '1'
+            then:
+              packet_mode: null
+  groups:
+  - event_options:
+      event_script:
+        file:
+        - checksum:
+            sha_256: 3851302285645cba1fd07d7062a8b5d84176b801fbffd27eae806810b9492cbf
+          name: mist_srx_event_dispatcher.py
+          python_script_user: mist
+        - checksum:
+            sha_256: 0b4df402a20057452cc39f1e8ef9c484aad8fb76a1466564eccc23cd1836e004
+          name: mist_link_event_logger.py
+          python_script_user: mist
+        - checksum:
+            sha_256: 2208c79bdbeca7000a860f8c0a6399e8f1d908583bc9cd193ef2ddb8a4cb7a2a
+          name: mist_backup_cfg.py
+          python_script_user: mist
+        - checksum:
+            sha_256: b29a60e7228408d8b8ac53047a324f725e09e9c2ba4b282654f03c3b7ddc882e
+          name: mist_storm_control_event_logger.py
+          python_script_user: mist
+        - checksum:
+            sha_256: dd94bcab374a467cab5650053fe41134f5f617c32145849e480f5c142ab56ac5
+          name: mist_link_event_capturer.py
+          python_script_user: mist
+        - checksum:
+            sha_256: f28019ed90f62be64791ec8a06af2b289e34baed49f191ce7f3cd328ffc09630
+          name: mist_monitor_diskspace.py
+          python_script_user: mist
+        - checksum:
+            sha_256: e9cab3ecdef518d23d7ca2c73c46f28a289eafb246ab2a95627d807cf05c6df1
+          name: mist_srx_evt.py
+          python_script_user: mist
+        - checksum:
+            sha_256: 25e00e4e42f4f90974990a28691add2bd96c05055d7954b216a0ccbd9efbd9b2
+          name: mist_srx_rt_event.py
+          python_script_user: mist
+        - checksum:
+            sha_256: eeb1573724bba2cd50efb9edffebd8a4f77944dc8de74d7a7f81f9cedef9331a
+          name: mist_event_aggregator.py
+          python_script_user: mist
+        - checksum:
+            sha_256: 61253d515a80a2e664e28b3c4eac92dacc3aed16573822e160164ba8b382260f
+          name: mist_collect_stats.py
+          python_script_user: mist
+        - checksum:
+            sha_256: 487e6f4766704afaa4f14d924df8a134df19d60e3a5d4bab03cf7cd09857755f
+          name: mist_srx_perf_probe.py
+          python_script_user: mist
+      generate_event:
+      - name: get-stats-every-three-minute
+        time_interval: '180'
+      - name: monitor-diskspace-now
+        time_interval: '86400'
+      - name: get-perf-probe-stats
+        time_interval: '180'
+      policy:
+      - events:
+        - snmp_trap_link_up
+        - snmp_trap_link_down
+        name: log-on-snmp-trap-link
+        then:
+          event_script:
+            name: mist_srx_event_dispatcher.py
+      - events: ui_commit_completed
+        name: backup-cfg-after-commit
+        then:
+          event_script:
+            name: mist_srx_event_dispatcher.py
+      - events: l2ald_st_ctl_in_effect
+        name: log-on-storm-ctrl-in-effect
+        then:
+          event_script:
+            name: mist_storm_control_event_logger.py
+      - events:
+        - dot1xd_auth_session_deleted
+        - dot1xd_rcvd_eaplogof_athntictd
+        - dot1xd_usr_access_denied
+        - dot1xd_usr_authenticated
+        - dot1xd_usr_session_disconnected
+        - ui_commit_not_confirmed
+        name: log-on-system-events
+        then:
+          event_script:
+            name: mist_srx_event_dispatcher.py
+      - events: monitor-diskspace-now
+        name: monitor-diskspace-policy
+        then:
+          event_script:
+            name: mist_monitor_diskspace.py
+      - events:
+        - kmd_vpn_up_alarm_user
+        - kmd_vpn_down_alarm_user
+        name: system-srx-events
+        then:
+          event_script:
+            name: mist_srx_evt.py
+      - events:
+        - rpd_ospf_nbrdown
+        - rpd_ospf_nbrup
+        - rpd_bgp_neighbor_state_changed
+        name: system-srx-route-events
+        then:
+          event_script:
+            name: mist_srx_rt_event.py
+      - events: get-stats-every-three-minute
+        name: events-aggr-policy
+        then:
+          event_script:
+            name: mist_srx_event_dispatcher.py
+      - events: get-stats-every-three-minute
+        name: get-stats-policy
+        then:
+          event_script:
+            name: mist_event_dispatcher.py
+      - events: get-perf-probe-stats
+        name: events-perf-probe-policy
+        then:
+          event_script:
+            name: mist_srx_perf_probe.py
+    name: mist-script
+    system:
+      scripts:
+        op:
+          file:
+            arguments:
+              name: cmd
+            checksum:
+              sha_256: fffed9f4c538dfee3f98e34302cd30dd2560bd65c9340ff5c3a14cc05f80ec49
+            name: mist_helper.py
+  - name: mist-wa
+    security:
+      application_tracking:
+        session_update_interval: '3'
+      log:
+        mode: stream
+        stream:
+          format: binary
+          host:
+            ipaddr: 13.52.21.166
+            port: '6514'
+          name: app_usage
+          transport:
+            protocol: tls
+            tcp_connections: '1'
+            tls_profile: app_usage
+        utc_timestamp: null
+      zones:
+        security_zone:
+        - application_tracking: null
+          name: internet
+        - application_tracking: null
+          name: mpls_wan
+        - application_tracking: null
+          name: trust
+    services:
+      ssl:
+        initiation:
+          profile:
+            actions:
+              crl:
+                disable: null
+            client_certificate: mist-device-cert
+            name: app_usage
+            protocol_version: tls12
+            trusted_ca: mist-ca
+  interfaces:
+    interface:
+    - description: colo-rt0
+      mtu: '9000'
+      name: ge-0/0/0
+      unit:
+        family:
+          inet:
+            address:
+              name: 216.227.251.1/31
+          mpls:
+            filter:
+              input: MPLS
+        name: '0'
+    - description: 'dallas-sw0: LAN'
+      flexible_vlan_tagging: null
+      name: ge-0/0/1
+      unit:
+      - description: PC vlan
+        family:
+          inet:
+            address:
+              name: 10.0.10.1/24
+        name: '10'
+        vlan_id: '10'
+      - description: Voice vlan
+        family:
+          inet:
+            address:
+              name: 10.0.20.1/24
+        name: '20'
+        vlan_id: '20'
+      - description: Network vlan
+        family:
+          inet:
+            address:
+              name: 10.0.30.1/24
+        name: '30'
+        vlan_id: '30'
+    - description: 'dallas-sw0: DMZ'
+      flexible_vlan_tagging: null
+      name: ge-0/0/2
+      unit:
+        description: DMZ LAN vlan 90
+        family:
+          inet:
+            address:
+              name: 192.168.90.1/24
+        name: '90'
+        vlan_id: '90'
+    - name: ge-0/0/7
+      unit:
+        family:
+          inet:
+            address:
+              name: 10.6.5.254/24
+        name: '0'
+    - name: fxp0
+      unit:
+        description: out of band interface
+        family:
+          inet:
+            address:
+              name: 192.168.105.200/24
+        name: '0'
+    - name: lo0
+      unit:
+        description: loopback
+        family:
+          inet:
+            address:
+              name: 192.168.255.200/32
+        name: '0'
+    - name: st0
+      unit:
+        description: vpn_tunnel
+        family:
+          inet:
+            address:
+              name: 10.200.200.1/24
+            mtu: '1500'
+        name: '1'
+  policy_options:
+    policy_statement:
+    - name: ECMP
+      term:
+        name: ECMP
+        then:
+          accept: null
+          load_balance:
+            per_packet: null
+    - name: LOOPBACK0
+      term:
+        from:
+          protocol: direct
+          route_filter:
+            address: 192.168.255.1/32
+            exact: null
+        name: lo0_0
+        then:
+          accept: null
+    - name: POLICY_DEFAULT
+      term:
+      - from:
+          route_filter:
+            address: 0.0.0.0/0
+            exact: null
+        name: DEFAULT
+        then:
+          accept: null
+      - name: REJECT
+        then:
+          reject: null
+    - name: POLICY_EXPORT_ROUTER_IPV4
+      term:
+        from:
+          prefix_list:
+            name: PREFIX_ROUTER_IPV4
+        name: ALL_IPV4
+        then:
+          accept: null
+    - name: redtail_lan
+      term:
+        from:
+          route_filter:
+            address: 10.0.0.0/16
+            exact: null
+        name: '1'
+        then:
+          accept: null
+    prefix_list:
+    - name: PREFIX_ALL
+      prefix_list_item:
+        name: 0.0.0.0/0
+    - name: PREFIX_DEFAULT
+      prefix_list_item:
+        name: 0.0.0.0/0
+    - apply_path: interfaces <*> unit <*> family inet address <*>
+      name: PREFIX_ROUTER_IPV4
+    - apply_path: interfaces lo0 unit 0 family inet address <*>
+      name: PREFIX_LOOPBACK_0_IPV4
+    - apply_path: interfaces lo0 unit 1 family inet address <*>
+      name: PREFIX_LOOPBACK_1_IPV4
+  protocols:
+    bgp:
+      group:
+        family:
+          inet_vpn:
+            unicast: null
+        local_address: 192.168.255.200
+        name: mpls_wan
+        neighbor:
+        - name: 192.168.255.210
+        - name: 192.168.255.220
+        type: internal
+    ldp:
+      interface:
+      - name: ge-0/0/0.0
+      - name: lo0.0
+    lldp:
+      interface:
+        name: all
+      port_description_type: interface-alias
+      port_id_subtype: interface-name
+    mpls:
+      interface:
+        name: ge-0/0/0.0
+    ospf:
+      area:
+        interface:
+        - name: lo0.0
+          passive: null
+        - interface_type: p2p
+          name: ge-0/0/0.0
+        name: 0.0.0.0
+      export: POLICY_EXPORT_ROUTER_IPV4
+  routing_instances:
+    instance:
+      access:
+        address_assignment:
+          pool:
+          - family:
+              inet:
+                dhcp_attributes:
+                  domain_name: redtail.com
+                  name_server:
+                  - name: 1.1.1.1
+                  - name: 8.8.8.8
+                  router:
+                    name: 10.0.10.1
+                host:
+                  hardware_address: 84:03:28:0b:d2:89
+                  ip_address: 10.0.10.254
+                  name: dallas-sw0
+                network: 10.0.10.0/24
+                range:
+                  high: 10.0.10.200
+                  low: 10.0.10.100
+                  name: range10
+            name: pool10
+          - family:
+              inet:
+                dhcp_attributes:
+                  domain_name: redtail.com
+                  name_server:
+                  - name: 1.1.1.1
+                  - name: 8.8.8.8
+                  router:
+                    name: 10.0.20.1
+                host:
+                  hardware_address: 84:03:28:0b:d2:89
+                  ip_address: 10.0.20.254
+                  name: dallas-sw0
+                network: 10.0.20.0/24
+                range:
+                  high: 10.0.20.200
+                  low: 10.0.20.100
+                  name: range20
+            name: pool20
+          - family:
+              inet:
+                dhcp_attributes:
+                  domain_name: redtail.com
+                  name_server:
+                  - name: 1.1.1.1
+                  - name: 8.8.8.8
+                  router:
+                    name: 10.0.30.1
+                host:
+                  hardware_address: 84:03:28:0b:d2:89
+                  ip_address: 10.0.30.254
+                  name: dallas-sw0
+                network: 10.0.30.0/24
+                range:
+                  high: 10.0.30.200
+                  low: 10.0.30.100
+                  name: range30
+            name: pool30
+      instance_type: vrf
+      interface:
+      - name: ge-0/0/1.10
+      - name: ge-0/0/1.20
+      - name: ge-0/0/1.30
+      - name: ge-0/0/2.90
+      name: redtail
+      route_distinguisher:
+        rd_type: 192.168.255.200:100
+      system:
+        services:
+          dhcp_local_server:
+            group:
+              interface:
+              - name: ge-0/0/1.10
+              - name: ge-0/0/1.20
+              - name: ge-0/0/1.30
+              name: redtail
+      vrf_table_label: null
+      vrf_target:
+        community: target:65000:100
+  routing_options:
+    autonomous_system:
+      as_number: '65000'
+    forwarding_table:
+      ecmp_fast_reroute: null
+    rib_groups:
+      import_policy: POLICY_DEFAULT
+      import_rib:
+      - inet.0
+      - redtail.inet.0
+      name: inet0_to_redtail
+    router_id: 192.168.255.200
+    static:
+      rib_group: inet0_to_redtail
+      route:
+      - name: 10.9.0.0/17
+        next_hop: 192.168.105.1
+        no_readvertise: null
+      - name: 192.168.101.0/24
+        next_hop: 192.168.105.1
+        no_readvertise: null
+      - name: 192.168.102.0/24
+        next_hop: 192.168.105.1
+        no_readvertise: null
+      - name: 192.168.103.0/24
+        next_hop: 192.168.105.1
+        no_readvertise: null
+      - name: 192.168.104.0/24
+        next_hop: 192.168.105.1
+        no_readvertise: null
+      - name: 0.0.0.0/0
+        next_hop: 10.6.5.1
+  security:
+    address_book:
+      address:
+        ip_prefix: 74.51.192.1/32
+        name: customer1
+      address_set:
+        address:
+          name: customer1
+        name: customers
+      name: global
+    forwarding_options:
+      family:
+        inet6:
+          mode: packet-based
+        mpls:
+          mode: flow-based
+    forwarding_process:
+      enhanced_services_mode: null
+    ike:
+      gateway:
+        address: 74.51.192.1
+        dead_peer_detection:
+          interval: '10'
+          optimized: null
+          threshold: '5'
+        external_interface: ge-0/0/0.0
+        ike_policy: customer1
+        local_identity:
+          hostname:
+            identity_hostname: hoth
+        name: 74_51_192_1_customer1
+        nat_keepalive: '5'
+        version: v1-only
+      policy:
+        mode: aggressive
+        name: customer1
+        pre_shared_key:
+          ascii_text: $9$dxVYoji.F6AevwgoZHkn/9pu1hSevMLIRlv8XVbjikmfQ/9t0Ic9ApOIRyroaZGjk3n9CpBs2H.f5/9O1RhKMWL7bsgLX
+        proposals: customer1-p1
+      proposal:
+        authentication_algorithm: sha1
+        authentication_method: pre-shared-keys
+        dh_group: group2
+        encryption_algorithm: aes-128-cbc
+        lifetime_seconds: '28800'
+        name: customer1-p1
+    ipsec:
+      policy:
+        name: customer1
+        perfect_forward_secrecy:
+          keys: group2
+        proposals: customer1-p2
+      proposal:
+        encryption_algorithm: aes-128-cbc
+        lifetime_kilobytes: '256'
+        lifetime_seconds: '3600'
+        name: customer1-p2
+        protocol: esp
+        undocumented:
+          authentication_algorithm: hmac-sha-256-96
+      vpn:
+        bind_interface: st0.1
+        df_bit: clear
+        establish_tunnels: immediately
+        ike:
+          gateway: 74_51_192_1_customer1
+          idle_time: '60'
+          install_interval: '1'
+          ipsec_policy: customer1
+          no_anti_replay: null
+        name: 74_51_192_1_customer1
+    log:
+      format: sd-syslog
+      mode: stream
+      report: null
+      source_address: 192.168.105.2
+      stream:
+        format: sd-syslog
+        host:
+          ipaddr: 192.168.105.203
+          port: '514'
+        name: log-collector.dmz.home
+        severity: info
+    nat:
+      source:
+        rule_set:
+        - from:
+            zone: trust
+          name: Zone_trust-Zone_internet
+          rule:
+            name: trust-internet
+            src_nat_rule_match:
+              destination_address: 0.0.0.0/0
+              source_address: 0.0.0.0/0
+            then:
+              source_nat:
+                interface: null
+          to:
+            zone: internet
+        - from:
+            zone: mpls_wan
+          name: Zone_mpls-Zone_internet
+          rule:
+            name: mpls-internet
+            src_nat_rule_match:
+              destination_address: 0.0.0.0/0
+              source_address: 0.0.0.0/0
+            then:
+              source_nat:
+                interface: null
+          to:
+            zone: internet
+    pki:
+      ca_profile:
+        ca_identity: mist-ca
+        name: mist-ca
+    policies:
+      policy:
+      - from_zone_name: mpls_wan
+        policy:
+          match:
+            application: any
+            destination_address: any
+            source_address: any
+          name: mpls_wan-mpls_wan
+          then:
+            permit: null
+        to_zone_name: mpls_wan
+      - from_zone_name: trust
+        policy:
+          match:
+            application: any
+            destination_address: any
+            source_address: any
+          name: trust_to_internet
+          then:
+            permit: null
+        to_zone_name: internet
+      - from_zone_name: mpls_wan
+        policy:
+          match:
+            application: any
+            destination_address: any
+            source_address: any
+          name: mpls_to_internet
+          then:
+            permit: null
+        to_zone_name: internet
+      - from_zone_name: trust
+        policy:
+          match:
+            application: any
+            destination_address: any
+            source_address: any
+          name: trust-to-trust
+          then:
+            permit: null
+        to_zone_name: trust
+    screen:
+      ids_option:
+        icmp:
+          ping_death: null
+        ip:
+          source_route_option: null
+          tear_drop: null
+        name: untrust-screen
+        tcp:
+          land: null
+          syn_flood:
+            alarm_threshold: '1024'
+            attack_threshold: '200'
+            destination_threshold: '2048'
+            source_threshold: '1024'
+            timeout: '20'
+    zones:
+      security_zone:
+      - host_inbound_traffic:
+          protocols:
+            name: all
+          system_services:
+            name: all
+        interfaces:
+        - name: ge-0/0/1.10
+        - name: ge-0/0/1.20
+        - name: ge-0/0/1.30
+        name: trust
+      - host_inbound_traffic:
+          protocols:
+            name: all
+          system_services:
+            name: all
+        interfaces:
+        - name: ge-0/0/0.0
+        - name: lo0.0
+        name: mpls_wan
+      - interfaces:
+          host_inbound_traffic:
+            protocols:
+              name: all
+            system_services:
+              name: all
+          name: ge-0/0/7.0
+        name: internet
+  services:
+    application_identification: null
+  snmp:
+    community:
+      authorization: read-only
+      clients:
+      - name: 192.168.105.0/24
+      - name: 0.0.0.0/0
+        restrict: null
+      name: $home_snmp$
+    interface: fxp0.0
+    trap_group:
+      categories:
+        chassis: null
+        configuration: null
+        link: null
+      name: space
+      targets:
+      - name: 192.168.105.201
+      - name: 192.168.105.202
+      version: v2
+    trap_options:
+      source_address:
+        address: 192.168.105.2
+  system:
+    authentication_order: password
+    commit:
+      synchronize: null
+    host_name: dallas-fw0
+    login:
+      user:
+      - authentication:
+          encrypted_password: $6$ZlA2peEY$803k5QuDxH1YBoHBVObfr0KVLavXLTu8nUlzIUmJbIhrMcQZZ3dWLD7Jj.IK0RKFXMJ6Csf2pnxg8MiuppZHj1
+        class: super-user
+        name: automation
+        uid: '3001'
+      - authentication:
+          encrypted_password: $6$2dwyuubo.OZC6ejt$kd5m2uLpWL7.l7AreWAbjmoRpJNhp1dpF2SkaT/lCMz.U/x4ZvMdk9i2K/Hjq9LfSR/1Y1zymB2TjOds166Zh1
+        class: super-user
+        full_name: mist
+        name: mist
+        uid: '2001'
+    name_server:
+    - name: 192.168.101.11
+    - name: 192.168.101.12
+    root_authentication:
+      encrypted_password: $6$eG4FXiQW$J4/a.5GZlXlrKcvJTpbaMl.qIelPqjR5lFk.POmxo5O3Vp5OdjHFFJ97PMqvABuZZOGXrdvSE6YF3f33wilgO.
+    scripts:
+      language: python
+      synchronize: null
+    services:
+      netconf:
+        ssh: null
+      outbound_ssh:
+        client:
+          device_id: 2324760f-b86d-45ba-80b2-e9c6d9b2f291.94f7adefc201
+          keep_alive:
+            retry: '12'
+            timeout: '5'
+          name: mist
+          secret: $9$g0Jik.P5n6A5TyleK8LqmP569u0ISlKIRs2aJDj9At0BEleW-dsKv7VbYoaDikmfz/CtuBI6/CuB1hcwY2gZUHkP3/C5T39CpB1SreKLxNdbg4Z-d.Pf5F3evMXdboJGiHm4oQF36AtIEclWL-VwaJDevoJZDkqfTz3nCOBErKM36ylvMXxk.mPFn69A01R/9lK8X-dk.mPz3CA0OIEDiCtO1hcwY2aDimfTQ365TSreMXxbs2goGmfTn6A5TlKWLN-qmP5n/p0BIRSOBbs4oGUtu0ISreK8-dsuO-VwYoaZUjkfT9ApESrAt8XxNbw4aZU.PTQnt0BCAORSrvMoJZjmf369uBIikmTznCABIESvWbs2
+          servers:
+            name: oc-term.mistsys.net
+            port: '2200'
+            retry: '1000'
+            timeout: '60'
+          services: netconf
+        traceoptions:
+          file:
+            filename: outbound-ssh.log
+            files: '5'
+            size: 64k
+          flag:
+            name: all
+      rest:
+        enable_explorer: null
+        http:
+          port: '8080'
+      ssh:
+        protocol_version: v2
+        root_login: allow
+      web_management:
+        http:
+          interface: fxp0.0
+          port: '8000'
+    syslog:
+      file:
+      - contents:
+        - name: any
+          notice: null
+        - info: null
+          name: authorization
+        name: messages
+      - contents:
+          info: null
+          name: any
+        match: (requested 'commit' operation)|(requested 'commit synchronize' operation)|(copying configuration to juniper.save)|(commit complete)|ifAdminStatus|(FRU power)|(FRU removal)|(FRU insertion)|(link UP)|transitioned|Transferred|transfer-file|(license add)|(license delete)|(package -X update)|(package -X delete)|(FRU Online)|(FRU Offline)|(plugged in)|(unplugged)|GRES
+        name: default-log-messages
+        structured_data: null
+      - archive:
+          files: '5'
+          size: 2m
+        name: escript.log
+      - archive:
+          files: '5'
+          size: 2m
+        match: '!(.*mist.*)'
+        name: interactive-commands
+      - archive:
+          files: '5'
+          size: 2m
+        name: op-script.log
+      - archive:
+          files: '5'
+          size: 2m
+        name: snapshot
+      host:
+        contents:
+          any: null
+          name: any
+        name: 192.168.103.31
+        port: '5514'
+        source_address: 192.168.105.2
+        structured_data: null
+      user:
+        contents:
+          emergency: null
+          name: any
+        name: '*'
+    time_zone: America/Chicago
+  version: 19.4R3.11

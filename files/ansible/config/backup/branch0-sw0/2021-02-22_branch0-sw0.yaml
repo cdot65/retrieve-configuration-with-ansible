@@ -1,0 +1,469 @@
+configuration:
+  '@commit_localtime': 2021-02-22 13:10:47 UTC
+  '@commit_seconds': '1613999447'
+  '@commit_user': automation
+  apply_groups:
+  - phcd_user_script
+  - mist-script
+  forwarding_options:
+    storm_control_profiles:
+      all: null
+      name: default
+  groups:
+  - name: phcd_user_script
+    system:
+      scripts:
+        language: python
+        op:
+          allow_url_for_python: null
+  - event_options:
+      event_script:
+        file:
+        - checksum:
+            sha_256: c87d791dd5e3b6f9d63aed9b538c11e949f514029d84f50823a026e8f4e220a1
+          name: mist_fwupgrade.py
+          python_script_user: mist
+        - checksum:
+            sha_256: bc713a1798451142977b71f198eff0ab4a2779da0381b8de17cf6244ce53253a
+          name: mist_event_dispatcher.py
+          python_script_user: mist
+        - checksum:
+            sha_256: 0b4df402a20057452cc39f1e8ef9c484aad8fb76a1466564eccc23cd1836e004
+          name: mist_link_event_logger.py
+          python_script_user: mist
+        - checksum:
+            sha_256: 2208c79bdbeca7000a860f8c0a6399e8f1d908583bc9cd193ef2ddb8a4cb7a2a
+          name: mist_backup_cfg.py
+          python_script_user: mist
+        - checksum:
+            sha_256: b29a60e7228408d8b8ac53047a324f725e09e9c2ba4b282654f03c3b7ddc882e
+          name: mist_storm_control_event_logger.py
+          python_script_user: mist
+        - checksum:
+            sha_256: c91e98cc3df1fba76934be66f980b8540b25fa222d956265321d7c202e4f8167
+          name: mist_link_event_capturer.py
+          python_script_user: mist
+        - checksum:
+            sha_256: f28019ed90f62be64791ec8a06af2b289e34baed49f191ce7f3cd328ffc09630
+          name: mist_monitor_diskspace.py
+          python_script_user: mist
+        - checksum:
+            sha_256: 365f3f8204d3c413a6e2af2f0c4041de56a8760f3bf1e38a634fa47c5daea201
+          name: mist_dynamic_port_usages.py
+          python_script_user: mist
+        - checksum:
+            sha_256: 0a05f53897721c398572676b967b003ba4b275619848fa349733787e8ae64b25
+          name: mist_dynamic_port_commit.py
+          python_script_user: mist
+        - checksum:
+            sha_256: eeb1573724bba2cd50efb9edffebd8a4f77944dc8de74d7a7f81f9cedef9331a
+          name: mist_event_aggregator.py
+          python_script_user: mist
+        - checksum:
+            sha_256: 61253d515a80a2e664e28b3c4eac92dacc3aed16573822e160164ba8b382260f
+          name: mist_collect_stats.py
+          python_script_user: mist
+      generate_event:
+      - name: get-stats-every-three-minute
+        time_interval: '180'
+      - name: monitor-diskspace-now
+        time_interval: '86400'
+      policy:
+      - events:
+        - snmp_trap_link_up
+        - snmp_trap_link_down
+        name: log-on-snmp-trap-link
+        then:
+          event_script:
+            name: mist_event_dispatcher.py
+      - events: ui_commit_completed
+        name: backup-cfg-after-commit
+        then:
+          event_script:
+            name: mist_event_dispatcher.py
+      - events: l2ald_st_ctl_in_effect
+        name: log-on-storm-ctrl-in-effect
+        then:
+          event_script:
+            name: mist_storm_control_event_logger.py
+      - events:
+        - dot1xd_auth_session_deleted
+        - dot1xd_rcvd_eaplogof_athntictd
+        - dot1xd_usr_access_denied
+        - dot1xd_usr_authenticated
+        - dot1xd_usr_session_disconnected
+        - eswd_stp_state_change_info
+        - ui_commit_not_confirmed
+        - chassisd_vchassis_member_update_notice
+        - chassisd_vchassis_member_list_notice
+        - chassisd_vchassis_member_op_notice
+        - snmpd_trap_cold_start
+        name: log-on-system-events
+        then:
+          event_script:
+            name: mist_event_dispatcher.py
+      - events: monitor-diskspace-now
+        name: monitor-diskspace-policy
+        then:
+          event_script:
+            name: mist_monitor_diskspace.py
+      - events: get-stats-every-three-minute
+        name: get-stats-policy
+        then:
+          event_script:
+          - name: mist_event_dispatcher.py
+          - name: mist_fwupgrade.py
+    name: mist-script
+    system:
+      scripts:
+        op:
+          file:
+            arguments:
+              name: cmd
+            checksum:
+              sha_256: fffed9f4c538dfee3f98e34302cd30dd2560bd65c9340ff5c3a14cc05f80ec49
+            name: mist_helper.py
+  - event_options:
+      generate_event:
+        name: timer-every-one-minute
+        time_interval: '60'
+      policy:
+      - events:
+        - lldp_neighbor_up
+        - snmp_trap_link_up
+        - snmp_trap_link_down
+        - ui_commit_completed
+        - dot1xd_usr_authenticated
+        - get-stats-every-three-minute
+        name: dynamic-port-detect
+        then:
+          event_script:
+            name: mist_dynamic_port_usages.py
+      - events: timer-every-one-minute
+        name: dynamic-port-commit
+        then:
+          event_script:
+            name: mist_dynamic_port_commit.py
+    name: mist-dpc
+  interfaces:
+    interface:
+    - description: branch0-ap0
+      name: ge-0/0/0
+      native_vlan_id: '30'
+      unit:
+        family:
+          ethernet_switching:
+            interface_mode: trunk
+            vlan:
+              members: all
+        name: '0'
+    - description: branch0-ap1
+      name: ge-0/0/1
+      native_vlan_id: '30'
+      unit:
+        family:
+          ethernet_switching:
+            interface_mode: trunk
+            vlan:
+              members: all
+        name: '0'
+    - name: ge-0/0/2
+      unit:
+        family:
+          ethernet_switching:
+            storm_control:
+              profile_name: default
+        name: '0'
+    - name: ge-0/0/3
+      unit:
+        family:
+          ethernet_switching:
+            storm_control:
+              profile_name: default
+        name: '0'
+    - name: ge-0/0/4
+      unit:
+        family:
+          ethernet_switching:
+            storm_control:
+              profile_name: default
+        name: '0'
+    - name: ge-0/0/5
+      unit:
+        family:
+          ethernet_switching:
+            storm_control:
+              profile_name: default
+        name: '0'
+    - name: ge-0/0/6
+      unit:
+        family:
+          ethernet_switching:
+            storm_control:
+              profile_name: default
+        name: '0'
+    - name: ge-0/0/7
+      unit:
+        family:
+          ethernet_switching:
+            storm_control:
+              profile_name: default
+        name: '0'
+    - name: ge-0/0/8
+      unit:
+        family:
+          ethernet_switching:
+            storm_control:
+              profile_name: default
+        name: '0'
+    - name: ge-0/0/9
+      unit:
+        family:
+          ethernet_switching:
+            storm_control:
+              profile_name: default
+        name: '0'
+    - name: ge-0/0/10
+      unit:
+        family:
+          ethernet_switching:
+            interface_mode: trunk
+            storm_control:
+              profile_name: default
+            vlan:
+              members:
+              - PC
+              - Voice
+              - Network
+        name: '0'
+    - name: ge-0/0/11
+      unit:
+        family:
+          ethernet_switching:
+            storm_control:
+              profile_name: default
+        name: '0'
+    - name: ge-0/1/0
+      unit:
+        family:
+          ethernet_switching:
+            storm_control:
+              profile_name: default
+        name: '0'
+    - name: xe-0/1/0
+      unit:
+        family:
+          ethernet_switching:
+            storm_control:
+              profile_name: default
+        name: '0'
+    - name: ge-0/1/1
+      unit:
+        family:
+          ethernet_switching:
+            storm_control:
+              profile_name: default
+        name: '0'
+    - name: xe-0/1/1
+      unit:
+        family:
+          ethernet_switching:
+            storm_control:
+              profile_name: default
+        name: '0'
+    - name: irb
+      unit:
+      - family:
+          inet:
+            dhcp:
+              vendor_id: Juniper:ex2300-c-12p:HV3620270182
+          inet6:
+            dhcpv6_client:
+              client_ia_type:
+                name: ia-na
+              client_identifier:
+                duid_type: duid-ll
+              client_type: stateful
+              vendor_id: Juniper:ex2300-c-12p:HV3620270182
+        name: '0'
+      - family:
+          inet:
+            dhcp: null
+        name: '10'
+      - family:
+          inet:
+            dhcp: null
+        name: '20'
+      - family:
+          inet:
+            dhcp: null
+        name: '30'
+    - name: vme
+      unit:
+        family:
+          inet:
+            address:
+              name: 192.168.105.201/24
+        name: '0'
+  poe:
+    interface:
+      name: all
+  protocols:
+    igmp_snooping:
+      vlan:
+        name: default
+    lldp:
+      interface:
+        name: all
+    lldp_med:
+      interface:
+        name: all
+    router_advertisement:
+      interface:
+      - name: vme.0
+      - name: irb.0
+    rstp:
+      interface:
+      - name: ge-0/0/0
+      - name: ge-0/0/1
+      - name: ge-0/0/2
+      - name: ge-0/0/3
+      - name: ge-0/0/4
+      - name: ge-0/0/5
+      - name: ge-0/0/6
+      - name: ge-0/0/7
+      - name: ge-0/0/8
+      - name: ge-0/0/9
+      - name: ge-0/0/10
+      - name: ge-0/0/11
+      - name: ge-0/1/0
+      - name: xe-0/1/0
+      - name: ge-0/1/1
+      - name: xe-0/1/1
+  routing_options:
+    static:
+      route:
+      - name: 192.168.101.0/24
+        next_hop: 192.168.105.1
+      - name: 192.168.103.0/24
+        next_hop: 192.168.105.1
+      - name: 192.168.104.0/24
+        next_hop: 192.168.105.1
+      - name: 10.9.0.0/16
+        next_hop: 192.168.105.1
+  system:
+    authentication_order: password
+    auto_snapshot: null
+    commit:
+      synchronize: null
+    host_name: branch0-sw0
+    login:
+      user:
+      - authentication:
+          encrypted_password: $6$RzzqIwVZ$K00pQTiMHaI1iHofcOtfqcIllc0EOZ8.YWNM12o7eivn2U/KX50Rfj3HWxSBif8gQ59dALKBq8/3mvsIAT3Kf0
+        class: super-user
+        name: automation
+        uid: '2002'
+      - authentication:
+          encrypted_password: $6$vC2WQ7e7tlu2s.3B$1WYqd3SDfgX3GiJNI7DHju7qI3zIGKuYgVjA9FekhImrQ0ibOCtd.ZSlST8tZN2/wBY83gxUZ0Et4A0so6eh./
+        class: super-user
+        full_name: mist
+        name: mist
+        uid: '2003'
+    phone_home:
+      rfc_compliant: null
+      server: https://redirect.juniper.net
+    processes:
+      dhcp_service:
+        traceoptions:
+          file:
+            filename: dhcp_logfile
+            size: 10m
+          flag:
+            name: all
+          level: all
+    root_authentication:
+      encrypted_password: $6$aX2DlRs2o2Gr4g3V$NOv99rBRAt/LNvDjmswSanPWMJ/b9jOM15Vc80QX6Fn7GhXQ2117kx5jfLc7iVcHQDfpiy9sghTc/5n1FtDFm.
+    scripts:
+      language: python
+      synchronize: null
+    services:
+      netconf:
+        rfc_compliant: null
+        ssh: null
+        yang_compliant: null
+      outbound_ssh:
+        client:
+          device_id: 2324760f-b86d-45ba-80b2-e9c6d9b2f291.8403280bd289
+          keep_alive:
+            retry: '12'
+            timeout: '5'
+          name: mist
+          secret: $9$aQJikPfz6/t4an/tu1Idbwg4ZUjHm5QxNwgoJDjHqmP5Fp0BRcyP5IEcSMWDiH.Tz9CuOIE6/u1IhrlaZGD.P5QFt0BZUp0B1hcevWx7Vbs2GjHsYn/CtOBSreKMXwYgZGi2g369A0O7-dsoJZUjkqfiHqfTzCA1RhrWLVwYJZjdVYoJZkqp0OBIcevWXxdCtWLxNY2Fn6CA0O1RhylB1NdwsJZjHqP5FCA0IhSmf39p0IRNdVYaZqmf5Fns2Giq.5Tz369O1REyW87SybsYgJZik.P360BIRcy0OX7-dg4z3n9A0EhrlvWTzhSylMWUjik.5Qz69p0zF/tOBEhwY2aJDq.56/taZHmTQ9CevMLdboJG
+          servers:
+            name: oc-term.mistsys.net
+            port: '2200'
+            retry: '1000'
+            timeout: '60'
+          services: netconf
+        traceoptions:
+          file:
+            filename: outbound-ssh.log
+            files: '5'
+            size: 64k
+          flag:
+            name: all
+      ssh:
+        protocol_version: v2
+        root_login: allow
+    syslog:
+      file:
+      - archive:
+          files: '5'
+          size: 2m
+        contents:
+        - name: any
+          notice: null
+        - any: null
+          name: authorization
+        name: messages
+      - archive:
+          files: '5'
+          size: 2m
+        contents:
+          any: null
+          name: interactive-commands
+        match: '!(.*mist.*)'
+        name: interactive-commands
+      - archive:
+          files: '5'
+          size: 2m
+        name: escript.log
+      - archive:
+          files: '5'
+          size: 2m
+        name: op-script.log
+      - archive:
+          files: '5'
+          size: 2m
+        name: snapshot
+      user:
+        contents:
+          emergency: null
+          name: any
+        name: '*'
+  version: 20200609.165031.6_builder.r1115480
+  vlans:
+    vlan:
+    - l3_interface: irb.30
+      name: Network
+      vlan_id: '30'
+    - l3_interface: irb.10
+      name: PC
+      vlan_id: '10'
+    - l3_interface: irb.20
+      name: Voice
+      vlan_id: '20'
+    - l3_interface: irb.0
+      name: default
+      vlan_id: '1'

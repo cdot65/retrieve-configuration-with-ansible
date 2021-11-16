@@ -1,0 +1,297 @@
+configuration:
+  '@commit_localtime': 2021-02-21 03:54:13 UTC
+  '@commit_seconds': '1613879653'
+  '@commit_user': automation
+  access:
+    address_assignment:
+      pool:
+      - family:
+          inet:
+            dhcp_attributes:
+              router:
+                name: 10.2.10.1
+            network: 10.2.10.0/24
+            range:
+              high: 10.2.10.254
+              low: 10.2.10.2
+              name: range10
+        name: pool10
+      - family:
+          inet:
+            dhcp_attributes:
+              router:
+                name: 10.2.20.1
+            network: 10.2.20.0/24
+            range:
+              high: 10.2.20.254
+              low: 10.2.20.2
+              name: range20
+        name: pool20
+      - family:
+          inet:
+            dhcp_attributes:
+              router:
+                name: 10.2.30.1
+            network: 10.2.30.0/24
+            range:
+              high: 10.2.30.254
+              low: 10.2.30.2
+              name: range30
+        name: pool30
+  firewall:
+    family:
+      mpls:
+        filter:
+          name: MPLS
+          term:
+            name: '1'
+            then:
+              packet_mode: null
+  interfaces:
+    interface:
+    - name: ge-0/0/0
+      unit:
+        family:
+          inet:
+            address:
+              name: 192.168.105.220/24
+        name: '0'
+    - flexible_vlan_tagging: null
+      name: ge-0/0/5
+      unit:
+      - description: PC vlan
+        family:
+          inet:
+            address:
+              name: 10.2.10.1/24
+        name: '10'
+        vlan_id: '10'
+      - description: Voice vlan
+        family:
+          inet:
+            address:
+              name: 10.2.20.1/24
+        name: '20'
+        vlan_id: '20'
+      - description: Network vlan
+        family:
+          inet:
+            address:
+              name: 10.2.30.1/24
+        name: '30'
+        vlan_id: '30'
+    - mtu: '9000'
+      name: ge-0/0/7
+      unit:
+        family:
+          inet:
+            address:
+              name: 190.221.165.1/31
+          mpls:
+            filter:
+              input: MPLS
+        name: '0'
+    - name: lo0
+      unit:
+        family:
+          inet:
+            address:
+              name: 192.168.255.220/32
+        name: '0'
+  policy_options:
+    policy_statement:
+      name: branch2_lan
+      term:
+        from:
+          route_filter:
+            address: 10.2.0.0/16
+            exact: null
+        name: '1'
+        then:
+          accept: null
+  protocols:
+    bgp:
+      group:
+        family:
+          inet_vpn:
+            unicast: null
+        local_address: 192.168.255.220
+        name: mpls_wan
+        neighbor:
+        - name: 192.168.255.210
+        - name: 192.168.255.200
+        type: internal
+    ldp:
+      interface:
+      - name: ge-0/0/7.0
+      - name: lo0.0
+    lldp:
+      interface:
+        name: all
+    mpls:
+      interface:
+        name: ge-0/0/7.0
+    ospf:
+      area:
+        interface:
+        - name: lo0.0
+          passive: null
+        - interface_type: p2p
+          name: ge-0/0/7.0
+        name: 0.0.0.0
+  routing_instances:
+    instance:
+      instance_type: vrf
+      interface:
+      - name: ge-0/0/5.10
+      - name: ge-0/0/5.20
+      - name: ge-0/0/5.30
+      name: branch2
+      route_distinguisher:
+        rd_type: 192.168.255.220:100
+      vrf_table_label: null
+      vrf_target:
+        community: target:65000:100
+  routing_options:
+    autonomous_system:
+      as_number: '65000'
+    router_id: 192.168.255.220
+    static:
+      route:
+      - name: 10.9.0.0/16
+        next_hop: 192.168.105.1
+      - name: 192.168.101.0/24
+        next_hop: 192.168.105.1
+      - name: 192.168.103.0/24
+        next_hop: 192.168.105.1
+      - name: 192.168.104.0/24
+        next_hop: 192.168.105.1
+  security:
+    forwarding_options:
+      family:
+        mpls:
+          mode: flow-based
+    policies:
+      policy:
+        from_zone_name: mpls_wan
+        policy:
+          match:
+            application: any
+            destination_address: any
+            source_address: any
+          name: mpls_wan-mpls_wan
+          then:
+            permit: null
+        to_zone_name: mpls_wan
+    screen:
+      ids_option:
+        icmp:
+          ping_death: null
+        ip:
+          source_route_option: null
+          tear_drop: null
+        name: untrust-screen
+        tcp:
+          land: null
+          syn_flood:
+            alarm_threshold: '1024'
+            attack_threshold: '200'
+            destination_threshold: '2048'
+            source_threshold: '1024'
+            timeout: '20'
+    zones:
+      security_zone:
+      - host_inbound_traffic:
+          protocols:
+            name: all
+          system_services:
+            name: all
+        interfaces:
+        - name: ge-0/0/5.10
+        - name: ge-0/0/5.20
+        - name: ge-0/0/5.30
+        name: trust
+      - host_inbound_traffic:
+          protocols:
+            name: all
+          system_services:
+            name: all
+        interfaces:
+        - name: ge-0/0/7.0
+        - name: lo0.0
+        name: mpls_wan
+      - host_inbound_traffic:
+          protocols:
+            name: all
+          system_services:
+            name: all
+        interfaces:
+          name: ge-0/0/0.0
+        name: mgmt
+  system:
+    host_name: branch2-fw0
+    license:
+      undocumented:
+        autoupdate:
+          url:
+            name: https://ae1.juniper.net/junos/key_retrieval
+    login:
+      user:
+        authentication:
+          encrypted_password: $6$shn/zoUR$jswkiRolE9FK/EdR66je.4cyQhJTg/KZ5Dxl6A.anFuBxsGwHa.TEe3SAIhV1RQYezFiN3dqKNlVyM3H69Nng0
+        class: super-user
+        name: automation
+        uid: '2000'
+    max_configuration_rollbacks: '5'
+    max_configurations_on_flash: '5'
+    name_server:
+    - name: 8.8.8.8
+    - name: 8.8.4.4
+    phone_home:
+      rfc_compliant: null
+      server: https://redirect.juniper.net
+    root_authentication:
+      encrypted_password: $6$27xOk0qk$3bEyYTJ7.cn2GRUDnsYAJuLRPFg4gjANDjo0sHKzX0kR1jVe52mLsR4KkJU8RoEfTvR./r00cuG5Rj/336/.50
+    services:
+      dhcp_local_server:
+        group:
+        - interface:
+            name: irb.0
+          name: jdhcp-group
+        - interface:
+          - name: ge-0/0/5.10
+          - name: ge-0/0/5.20
+          - name: ge-0/0/5.30
+          name: branch2
+      netconf:
+        ssh: null
+      ssh: null
+      web_management:
+        https:
+          system_generated_certificate: null
+    syslog:
+      archive:
+        files: '3'
+        size: 100k
+      file:
+      - contents:
+        - name: any
+          notice: null
+        - info: null
+          name: authorization
+        name: messages
+      - contents:
+          any: null
+          name: interactive-commands
+        name: interactive-commands
+      user:
+        contents:
+          emergency: null
+          name: any
+        name: '*'
+  version: 19.4R3-S1.3
+  vlans:
+    vlan:
+      l3_interface: irb.0
+      name: vlan-trust
+      vlan_id: '3'

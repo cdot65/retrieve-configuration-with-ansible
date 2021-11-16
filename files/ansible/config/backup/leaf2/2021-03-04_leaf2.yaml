@@ -1,0 +1,351 @@
+configuration:
+  '@commit_localtime': 2021-03-02 10:15:37 CST
+  '@commit_seconds': '1614701737'
+  '@commit_user': root
+  chassis:
+    aggregated_devices:
+      ethernet:
+        device_count: '2'
+  forwarding_options:
+    storm_control_profiles:
+      all: null
+      name: default
+  interfaces:
+    interface:
+    - name: xe-0/0/1
+      unit:
+        family:
+          inet:
+            address:
+              name: 10.0.0.11/31
+        name: '0'
+    - name: xe-0/0/2
+      unit:
+        family:
+          inet:
+            address:
+              name: 10.0.0.15/31
+        name: '0'
+    - ether_options:
+        ieee_802.3ad:
+          bundle: ae0
+      name: xe-0/0/5
+    - ether_options:
+        ieee_802.3ad:
+          bundle: ae1
+      name: xe-0/0/6
+    - name: xe-0/0/7
+      unit:
+        family:
+          ethernet_switching:
+            interface_mode: trunk
+            vlan:
+              members:
+              - v300
+              - v100
+        name: '0'
+    - aggregated_ether_options:
+        lacp:
+          passive: null
+          system_id: 00:00:00:01:01:01
+      esi:
+        all_active: null
+        identifier: 00:01:01:01:01:01:01:01:01:01
+      name: ae0
+      unit:
+        family:
+          ethernet_switching:
+            interface_mode: access
+            vlan:
+              members: v100
+        name: '0'
+    - aggregated_ether_options:
+        lacp:
+          passive: null
+          system_id: 00:00:00:01:01:01
+      esi:
+        all_active: null
+        identifier: 00:02:02:02:02:02:02:02:02:02
+      name: ae1
+      unit:
+        family:
+          ethernet_switching:
+            interface_mode: access
+            vlan:
+              members: v200
+        name: '0'
+    - name: em0
+      unit:
+        description: out of band interface
+        family:
+          inet:
+            address:
+              name: 192.168.105.42/24
+        name: '0'
+    - name: em1
+      unit:
+        family:
+          inet:
+            address:
+              name: 169.254.0.2/24
+        name: '0'
+    - name: lo0
+      unit:
+        family:
+          inet:
+            address:
+              name: 10.255.255.122/32
+        name: '0'
+  policy_options:
+    community:
+    - members: target:1:100
+      name: com100
+    - members: target:1:200
+      name: com200
+    - members: target:1:300
+      name: com300
+    - members: target:1:400
+      name: com400
+    policy_statement:
+    - name: LEAF-PREPEND
+      then:
+        as_path_prepend: '65402'
+    - from:
+        family: inet
+        protocol: direct
+        route_filter:
+          address: 0.0.0.0/0
+          prefix_length_range: /32-/32
+      name: lo0
+      then:
+        accept: null
+    - name: load-balance
+      term:
+        name: '1'
+        then:
+          load_balance:
+            per_packet: null
+    - name: vrf-imp
+      term:
+      - from:
+          community: com100
+        name: t1
+        then:
+          accept: null
+      - from:
+          community: com200
+        name: t2
+        then:
+          accept: null
+      - from:
+          community: com300
+        name: t3
+        then:
+          accept: null
+      - from:
+          community: com400
+        name: t4
+        then:
+          accept: null
+      - name: t5
+        then:
+          reject: null
+  protocols:
+    bgp:
+      group:
+      - advertise_peer_as: null
+        export: lo0
+        family:
+          inet:
+            unicast:
+              loops:
+                loops: '2'
+        multipath: null
+        name: underlay
+        neighbor:
+        - description: spine-1
+          name: 10.0.0.10
+        - description: spine-2
+          name: 10.0.0.14
+        peer_as: '65401'
+        type: external
+      - family:
+          evpn:
+            signaling: null
+        local_address: 10.255.255.122
+        multihop:
+          no_nexthop_change: null
+          ttl: '255'
+        name: EVPN_VXLAN_CORE
+        neighbor:
+        - description: core-1
+          name: 10.255.255.101
+        - description: core-2
+          name: 10.255.255.102
+        peer_as: '65400'
+        type: external
+      - export: LEAF-PREPEND
+        family:
+          evpn:
+            signaling: null
+        local_address: 10.255.255.122
+        name: EVPN_VXLAN_LEAF
+        neighbor:
+          description: leaf-1
+          name: 10.255.255.121
+        type: internal
+    evpn:
+      encapsulation: vxlan
+      extended_vni_list:
+      - '1100'
+      - '1200'
+      - '1300'
+      - '1400'
+      multicast_mode: ingress-replication
+      vni_options:
+        vni:
+        - name: '1100'
+          vrf_target:
+            undocumented:
+              export: target:1:100
+        - name: '1200'
+          vrf_target:
+            undocumented:
+              export: target:1:200
+        - name: '1300'
+          vrf_target:
+            undocumented:
+              export: target:1:300
+        - name: '1400'
+          vrf_target:
+            undocumented:
+              export: target:1:400
+    igmp_snooping:
+      vlan:
+        name: default
+    lldp:
+      interface:
+      - name: all
+      - disable: null
+        name: em0
+      port_description_type: interface-alias
+      port_id_subtype: interface-name
+  routing_options:
+    autonomous_system:
+      as_number: '65402'
+    forwarding_table:
+      ecmp_fast_reroute: null
+      export: load-balance
+    router_id: 10.255.255.122
+    static:
+      route:
+      - name: 10.9.0.0/17
+        next_hop: 192.168.105.1
+        no_readvertise: null
+      - name: 192.168.101.0/24
+        next_hop: 192.168.105.1
+        no_readvertise: null
+      - name: 192.168.103.0/24
+        next_hop: 192.168.105.1
+        no_readvertise: null
+      - name: 192.168.104.0/24
+        next_hop: 192.168.105.1
+        no_readvertise: null
+  switch_options:
+    route_distinguisher:
+      rd_type: 10.255.255.122:1
+    vrf_import: vrf-imp
+    vrf_target:
+      community: target:9999:9999
+    vtep_source_interface:
+      interface_name: lo0.0
+  system:
+    extensions:
+      providers:
+      - license_type:
+          deployment_scope: commercial
+          name: juniper
+        name: juniper
+      - license_type:
+          deployment_scope: commercial
+          name: juniper
+        name: chef
+    host_name: leaf-2
+    login:
+      user:
+      - authentication:
+          encrypted_password: $6$ZTX3yUw7$FTSrv2.iO6/4I97SNcTQ3NtZxT6N.Bt7K2Um3pNOEw7r3v9kNBWMrEdOKaNGhTZzz6M4w1t/EVDEj6IEoRB.A0
+        class: super-user
+        name: automation
+        uid: '3001'
+      - authentication:
+          ssh_rsa:
+            name: ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEA6NF8iallvQVp22WDkTkyrtvp9eWW6A8YVr+kz4TjGYe7gHzIw+niNltGEFHzD8+v1I2YJ6oXevct1YeS0o9HZyN1Q9qgCgzUFtdOKLv6IedplqoPkcmF0aYet2PkEDo3MlTBckFXPITAMzF8dJSIFo9D8HfdOV0IAdx4O7PtixWKn5y2hMNG0zQPyUecp4pzC6kivAIhyfHilFR61RGL+GPXQ2MWZWFYbAGjyiYJnAmCP3NOTd0jMZEnDkbUvxhMmBYSdETk1rRgm+R4LOzFUGaHqHDLKLX+FIPKcF96hrucXzcWyLbIbEgE98OHlnVYCzRdK8jlqm8tehUc9c9WhQ== vagrant insecure public key
+        class: super-user
+        name: vagrant
+        uid: '2000'
+    name_server:
+    - name: 192.168.101.11
+    - name: 192.168.101.12
+    root_authentication:
+      encrypted_password: $6$eG4FXiQW$J4/a.5GZlXlrKcvJTpbaMl.qIelPqjR5lFk.POmxo5O3Vp5OdjHFFJ97PMqvABuZZOGXrdvSE6YF3f33wilgO.
+      ssh_rsa:
+        name: ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEA6NF8iallvQVp22WDkTkyrtvp9eWW6A8YVr+kz4TjGYe7gHzIw+niNltGEFHzD8+v1I2YJ6oXevct1YeS0o9HZyN1Q9qgCgzUFtdOKLv6IedplqoPkcmF0aYet2PkEDo3MlTBckFXPITAMzF8dJSIFo9D8HfdOV0IAdx4O7PtixWKn5y2hMNG0zQPyUecp4pzC6kivAIhyfHilFR61RGL+GPXQ2MWZWFYbAGjyiYJnAmCP3NOTd0jMZEnDkbUvxhMmBYSdETk1rRgm+R4LOzFUGaHqHDLKLX+FIPKcF96hrucXzcWyLbIbEgE98OHlnVYCzRdK8jlqm8tehUc9c9WhQ== vagrant insecure public key
+    services:
+      netconf:
+        ssh: null
+      rest:
+        enable_explorer: null
+        http:
+          port: '8080'
+      ssh:
+        root_login: allow
+    syslog:
+      file:
+      - contents:
+        - name: any
+          notice: null
+        - info: null
+          name: authorization
+        name: messages
+      - contents:
+          any: null
+          name: interactive-commands
+        name: interactive-commands
+      - contents:
+          info: null
+          name: any
+        match: (requested 'commit' operation)|(requested 'commit synchronize' operation)|(copying configuration to juniper.save)|(commit complete)|ifAdminStatus|(FRU power)|(FRU removal)|(FRU insertion)|(link UP)|transitioned|Transferred|transfer-file|(license add)|(license delete)|(package -X update)|(package -X delete)|(FRU Online)|(FRU Offline)|(plugged in)|(unplugged)|GRES
+        name: default-log-messages
+        structured_data: null
+      user:
+        contents:
+          emergency: null
+          name: any
+        name: '*'
+    time_zone: America/Chicago
+  version: 18.4R2.7
+  vlans:
+    vlan:
+    - name: default
+      vlan_id: '1'
+    - name: v100
+      vlan_id: '100'
+      vxlan:
+        ingress_node_replication: null
+        vni: '1100'
+    - name: v200
+      vlan_id: '200'
+      vxlan:
+        ingress_node_replication: null
+        vni: '1200'
+    - name: v300
+      vlan_id: '300'
+      vxlan:
+        ingress_node_replication: null
+        vni: '1300'
+    - name: v400
+      vlan_id: '400'
+      vxlan:
+        ingress_node_replication: null
+        vni: '1400'

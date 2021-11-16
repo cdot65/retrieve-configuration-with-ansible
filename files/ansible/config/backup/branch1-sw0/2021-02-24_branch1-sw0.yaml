@@ -1,0 +1,296 @@
+configuration:
+  '@commit_localtime': 2021-02-22 09:58:42 UTC
+  '@commit_seconds': '1613987922'
+  '@commit_user': root
+  apply_groups: phcd_user_script
+  chassis:
+    redundancy:
+      graceful_switchover: null
+  forwarding_options:
+    storm_control_profiles:
+      all: null
+      name: default
+  groups:
+    name: phcd_user_script
+    system:
+      scripts:
+        language: python
+        op:
+          allow_url_for_python: null
+  interfaces:
+    interface:
+    - name: ge-0/0/0
+      unit:
+        family:
+          ethernet_switching:
+            storm_control:
+              profile_name: default
+        name: '0'
+    - name: ge-0/0/1
+      unit:
+        family:
+          ethernet_switching:
+            storm_control:
+              profile_name: default
+        name: '0'
+    - name: ge-0/0/2
+      unit:
+        family:
+          ethernet_switching:
+            storm_control:
+              profile_name: default
+        name: '0'
+    - name: ge-0/0/3
+      unit:
+        family:
+          ethernet_switching:
+            storm_control:
+              profile_name: default
+        name: '0'
+    - name: ge-0/0/4
+      unit:
+        family:
+          ethernet_switching:
+            storm_control:
+              profile_name: default
+        name: '0'
+    - name: ge-0/0/5
+      unit:
+        family:
+          ethernet_switching:
+            storm_control:
+              profile_name: default
+        name: '0'
+    - name: ge-0/0/6
+      unit:
+        family:
+          ethernet_switching:
+            storm_control:
+              profile_name: default
+        name: '0'
+    - name: ge-0/0/7
+      unit:
+        family:
+          ethernet_switching:
+            storm_control:
+              profile_name: default
+        name: '0'
+    - name: ge-0/0/8
+      unit:
+        family:
+          ethernet_switching:
+            storm_control:
+              profile_name: default
+        name: '0'
+    - name: ge-0/0/9
+      unit:
+        family:
+          ethernet_switching:
+            storm_control:
+              profile_name: default
+        name: '0'
+    - name: ge-0/0/10
+      unit:
+        family:
+          ethernet_switching:
+            storm_control:
+              profile_name: default
+        name: '0'
+    - name: ge-0/0/11
+      unit:
+        family:
+          ethernet_switching:
+            interface_mode: trunk
+            storm_control:
+              profile_name: default
+            vlan:
+              members: all
+        name: '0'
+    - name: ge-0/1/0
+      unit:
+        family:
+          ethernet_switching:
+            storm_control:
+              profile_name: default
+        name: '0'
+    - name: xe-0/1/0
+      unit:
+        family:
+          ethernet_switching:
+            storm_control:
+              profile_name: default
+        name: '0'
+    - name: ge-0/1/1
+      unit:
+        family:
+          ethernet_switching:
+            storm_control:
+              profile_name: default
+        name: '0'
+    - name: xe-0/1/1
+      unit:
+        family:
+          ethernet_switching:
+            storm_control:
+              profile_name: default
+        name: '0'
+    - name: irb
+      unit:
+      - family:
+          inet:
+            dhcp:
+              vendor_id: Juniper:ex2300-c-12t:HW0216520055
+          inet6:
+            dhcpv6_client:
+              client_ia_type:
+                name: ia-na
+              client_identifier:
+                duid_type: duid-ll
+              client_type: stateful
+              vendor_id: Juniper:ex2300-c-12t:HW0216520055
+        name: '0'
+      - family:
+          inet:
+            dhcp: null
+        name: '10'
+      - family:
+          inet:
+            dhcp: null
+        name: '20'
+      - family:
+          inet:
+            dhcp: null
+        name: '30'
+    - name: vme
+      unit:
+        family:
+          inet:
+            address:
+              name: 192.168.105.211/24
+        name: '0'
+  protocols:
+    igmp_snooping:
+      vlan:
+        name: default
+    lldp:
+      interface:
+      - name: all
+      - disable: null
+        name: me0
+      port_description_type: interface-alias
+      port_id_subtype: interface-name
+    lldp_med:
+      interface:
+        name: all
+    router_advertisement:
+      interface:
+      - name: vme.0
+      - name: irb.0
+    rstp:
+      interface:
+      - name: ge-0/0/0
+      - name: ge-0/0/1
+      - name: ge-0/0/2
+      - name: ge-0/0/3
+      - name: ge-0/0/4
+      - name: ge-0/0/5
+      - name: ge-0/0/6
+      - name: ge-0/0/7
+      - name: ge-0/0/8
+      - name: ge-0/0/9
+      - name: ge-0/0/10
+      - name: ge-0/0/11
+      - name: ge-0/1/0
+      - name: xe-0/1/0
+      - name: ge-0/1/1
+      - name: xe-0/1/1
+  routing_options:
+    static:
+      route:
+      - name: 10.9.0.0/16
+        next_hop: 192.168.105.1
+      - name: 192.168.101.0/24
+        next_hop: 192.168.105.1
+      - name: 192.168.103.0/24
+        next_hop: 192.168.105.1
+      - name: 192.168.104.0/24
+        next_hop: 192.168.105.1
+  system:
+    authentication_order: password
+    auto_snapshot: null
+    commit:
+      synchronize: null
+    host_name: branch1-sw0
+    login:
+      user:
+      - authentication:
+          encrypted_password: $6$oDRV6XtU$jS/Q1mxb2yTXcFFFZXUJaxLXkfxWAglmId6qLdyTU8SH2jzd8g/7b68zaOpcPLQOwuq.FG/exdJS2ca4sE0Cf/
+        class: super-user
+        name: automation
+        uid: '2001'
+      - authentication:
+          encrypted_password: $6$7ZBjyasw$fDEpYmOX8oapXRpEzYILLo2SacdYcI8gcH2ijQFAxGxJp0881GCUNoAlYxrhnCbPfnBA61S4mK73CiwFHNh2M1
+        class: super-user
+        name: packetferret
+        uid: '2000'
+    name_server:
+      name: 1.1.1.1
+    phone_home:
+      rfc_compliant: null
+      server: https://redirect.juniper.net
+    processes:
+      dhcp_service:
+        traceoptions:
+          file:
+            filename: dhcp_logfile
+            size: 10m
+          flag:
+            name: all
+          level: all
+    root_authentication:
+      encrypted_password: $6$cIWSlIWd$7ZUQviI2Rue.qxFV.t2AzbFpdwfK0WMg1QvE7FuTwJLH1W8f5BpRlRmhaZ2H68tc2reXXGD4923C9gkhBzVm8.
+    scripts:
+      language: python
+      synchronize: null
+    services:
+      netconf:
+        rfc_compliant: null
+        ssh: null
+        yang_compliant: null
+      ssh:
+        protocol_version: v2
+    syslog:
+      file:
+      - contents:
+        - name: any
+          notice: null
+        - info: null
+          name: authorization
+        name: messages
+      - contents:
+          any: null
+          name: interactive-commands
+        name: interactive-commands
+      user:
+        contents:
+          emergency: null
+          name: any
+        name: '*'
+  version: 20200609.165031.6_builder.r1115480
+  vlans:
+    vlan:
+    - description: Network vlan
+      l3_interface: irb.30
+      name: Network
+      vlan_id: '30'
+    - description: PC vlan
+      l3_interface: irb.10
+      name: PC
+      vlan_id: '10'
+    - description: Voice vlan
+      l3_interface: irb.20
+      name: Voice
+      vlan_id: '20'
+    - l3_interface: irb.0
+      name: default
+      vlan_id: '1'

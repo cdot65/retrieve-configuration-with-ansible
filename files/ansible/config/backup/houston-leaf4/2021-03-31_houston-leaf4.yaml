@@ -1,0 +1,355 @@
+configuration:
+  '@commit_localtime': 2021-03-31 00:13:58 UTC
+  '@commit_seconds': '1617149638'
+  '@commit_user': apstra
+  forwarding_options:
+    storm_control_profiles:
+      all: null
+      name: default
+  interfaces:
+    interface:
+    - description: facing_spine1:xe-0/0/3
+      mtu: '9216'
+      name: xe-0/0/0
+      unit:
+        family:
+          inet:
+            address:
+              name: 172.16.20.7/31
+        name: '0'
+    - description: facing_spine2:xe-0/0/3
+      mtu: '9216'
+      name: xe-0/0/1
+      unit:
+        family:
+          inet:
+            address:
+              name: 172.16.20.15/31
+        name: '0'
+    - name: xe-0/0/2
+      unit:
+        family:
+          inet: null
+        name: '0'
+    - name: xe-0/0/3
+      unit:
+        family:
+          inet: null
+        name: '0'
+    - description: to.houston-rack2-001-server002:eth0
+      mtu: '9100'
+      name: xe-0/0/4
+      native_vlan_id: '4'
+      unit:
+        family:
+          ethernet_switching:
+            interface_mode: trunk
+            vlan:
+              members: vn4
+        name: '0'
+    - name: xe-0/0/5
+      unit:
+        family:
+          inet: null
+        name: '0'
+    - name: xe-0/0/6
+      unit:
+        family:
+          inet: null
+        name: '0'
+    - name: xe-0/0/7
+      unit:
+        family:
+          inet: null
+        name: '0'
+    - name: xe-0/0/8
+      unit:
+        family:
+          inet: null
+        name: '0'
+    - name: xe-0/0/9
+      unit:
+        family:
+          inet: null
+        name: '0'
+    - name: xe-0/0/10
+      unit:
+        family:
+          inet: null
+        name: '0'
+    - name: xe-0/0/11
+      unit:
+        family:
+          inet: null
+        name: '0'
+    - name: em0
+      unit:
+        family:
+          inet:
+            address:
+              name: 192.168.105.46/24
+        name: '0'
+    - name: em1
+      unit:
+        family:
+          inet:
+            address:
+              name: 169.254.0.2/24
+        name: '0'
+    - name: irb
+      unit:
+      - family:
+          inet:
+            address:
+              name: 192.168.10.1/24
+            mtu: '9000'
+        mac: 00:1c:73:00:00:01
+        name: '3'
+      - family:
+          inet:
+            address:
+              name: 192.168.20.1/24
+            mtu: '9000'
+        mac: 00:1c:73:00:00:01
+        name: '4'
+    - name: lo0
+      unit:
+      - family:
+          inet:
+            address:
+              name: 10.255.10.3/32
+        name: '0'
+      - family:
+          inet:
+            address:
+              name: 10.255.10.7/32
+        name: '2'
+  policy_options:
+    policy_statement:
+    - name: AllPodNetworks
+      term:
+        from:
+          family: inet
+          protocol: direct
+        name: AllPodNetworks-10
+        then:
+          accept: null
+    - name: BGP-AOS-Policy
+      term:
+        from:
+          policy: AllPodNetworks
+        name: BGP-AOS-Policy-10
+        then:
+          accept: null
+    - name: DEFAULT_DENY
+      term:
+        name: DEFAULT_DENY-10
+        then:
+          reject: null
+    - name: PFE-LB
+      then:
+        load_balance:
+          per_packet: null
+  protocols:
+    bgp:
+      graceful_restart: null
+      group:
+      - export: ( BGP-AOS-Policy || DEFAULT_DENY )
+        multipath:
+          multiple_as: null
+        name: l3clos-l
+        neighbor:
+        - description: facing_spine1
+          family:
+            inet:
+              unicast: null
+          local_address: 172.16.20.7
+          name: 172.16.20.6
+          peer_as: '65200'
+        - description: facing_spine2
+          family:
+            inet:
+              unicast: null
+          local_address: 172.16.20.15
+          name: 172.16.20.14
+          peer_as: '65201'
+        type: external
+      - family:
+          evpn:
+            signaling:
+              loops:
+                loops: '2'
+        multihop:
+          no_nexthop_change: null
+          ttl: '1'
+        multipath:
+          multiple_as: null
+        name: l3clos-l-evpn
+        neighbor:
+        - description: facing_spine1-evpn-overlay
+          family:
+            evpn:
+              signaling: null
+          local_address: 10.255.10.3
+          name: 10.255.0.0
+          peer_as: '65200'
+        - description: facing_spine2-evpn-overlay
+          family:
+            evpn:
+              signaling: null
+          local_address: 10.255.10.3
+          name: 10.255.0.1
+          peer_as: '65201'
+        type: external
+      log_updown: null
+      multipath: null
+    evpn:
+      default_gateway: do-not-advertise
+      encapsulation: vxlan
+      extended_vni_list: all
+      vni_options:
+        vni:
+        - name: '10001'
+          vrf_target:
+            community: target:10001:1
+        - name: '10002'
+          vrf_target:
+            community: target:10002:1
+    lldp:
+      interface:
+        name: all
+      neighbour_port_info_display: port-id
+      port_description_type: interface-description
+      port_id_subtype: interface-name
+    rstp:
+      bpdu_block_on_edge: null
+      bridge_priority: '0'
+      interface:
+        name: xe-0/0/4
+  routing_instances:
+    instance:
+      instance_type: vrf
+      interface:
+      - name: irb.3
+      - name: irb.4
+      - name: lo0.2
+      name: HOUSTON_VRF
+      protocols:
+        evpn:
+          ip_prefix_routes:
+            advertise: direct-nexthop
+            encapsulation: vxlan
+            export: ( BGP-AOS-Policy || DEFAULT_DENY )
+            vni: '10000'
+      route_distinguisher:
+        rd_type: 10.255.10.3:2
+      routing_options:
+        auto_export: null
+        multipath: null
+      vrf_table_label: null
+      vrf_target:
+        community: target:10000:1
+  routing_options:
+    autonomous_system:
+      as_number: '65303'
+    forwarding_table:
+      chained_composite_next_hop:
+        ingress:
+          evpn: null
+      ecmp_fast_reroute: null
+      export: PFE-LB
+    router_id: 10.255.10.3
+    static:
+      route:
+      - name: 192.168.101.0/24
+        next_hop: 192.168.105.1
+      - name: 192.168.102.0/24
+        next_hop: 192.168.105.1
+      - name: 192.168.103.0/24
+        next_hop: 192.168.105.1
+      - name: 192.168.104.0/24
+        next_hop: 192.168.105.1
+      - name: 10.9.0.0/16
+        next_hop: 192.168.105.1
+  switch_options:
+    route_distinguisher:
+      rd_type: 10.255.10.3:65534
+    vrf_target:
+      community: target:100:100
+    vtep_source_interface:
+      interface_name: lo0.0
+  system:
+    extensions:
+      providers:
+      - license_type:
+          deployment_scope: commercial
+          name: juniper
+        name: juniper
+      - license_type:
+          deployment_scope: commercial
+          name: juniper
+        name: chef
+    host_name: houston-rack2-001-leaf2
+    login:
+      user:
+      - authentication:
+          encrypted_password: $6$ejnj0pcv$cuy8kO4F.xRDfq9DbOhbUFXK8eI1/4FgoDaNk9/zCQlM9TTOB3My65wqWgMCGEoNDN9YVLeR9FXMPdxReLmgw1
+        class: super-user
+        name: apstra
+        uid: '2002'
+      - authentication:
+          encrypted_password: $6$/uI1r4.b$Uu/VOMye0YtpiJPsU/ZHor1JpXHfAsdR.T4s8D.kg6WqxC76EyjAYFVG71l.nh/3Jhml9kQXkcZV1KuoTARBM.
+        class: super-user
+        name: automation
+        uid: '2001'
+    root_authentication:
+      encrypted_password: $6$B16mn9wb$jCqPjx2wTNF80YEw4egTpPl8pXfOL39gpuV3ktm/oBo77Qc7/2AD7Woaviwfpv5eq1h286mIycNp8RjtwyDE60
+    services:
+      extension_service:
+        notification:
+          allow_clients:
+            address: 0.0.0.0/0
+        request_response:
+          grpc:
+            max_connections: '30'
+            undocumented:
+            - clear_text: null
+            - skip_authentication: null
+      netconf:
+        ssh: null
+      rest:
+        enable_explorer: null
+        http:
+          port: '8080'
+      ssh:
+        root_login: allow
+    syslog:
+      file:
+      - contents:
+        - name: any
+          notice: null
+        - info: null
+          name: authorization
+        name: messages
+      - contents:
+          any: null
+          name: interactive-commands
+        name: interactive-commands
+      user:
+        contents:
+          emergency: null
+          name: any
+        name: '*'
+  version: 20191212.201431_builder.r1074901
+  vlans:
+    vlan:
+    - l3_interface: irb.3
+      name: vn3
+      vlan_id: '3'
+      vxlan:
+        vni: '10001'
+    - l3_interface: irb.4
+      name: vn4
+      vlan_id: '4'
+      vxlan:
+        vni: '10002'

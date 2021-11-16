@@ -1,0 +1,598 @@
+configuration:
+  '@commit_localtime': 2021-02-22 08:13:40 CST
+  '@commit_seconds': '1614003220'
+  '@commit_user': automation
+  applications:
+    application_set:
+      application:
+      - name: junos-icmp-ping
+      - name: junos-ping
+      - name: junos-ssh
+      name: FIREWALL_MANAGEMENT
+  chassis:
+    aggregated_devices:
+      ethernet:
+        device_count: '8'
+  firewall:
+    family:
+      mpls:
+        filter:
+          name: MPLS
+          term:
+            name: '1'
+            then:
+              packet_mode: null
+  interfaces:
+    interface:
+    - description: colo-rt0
+      mtu: '9000'
+      name: ge-0/0/0
+      unit:
+        family:
+          inet:
+            address:
+              name: 216.227.251.1/31
+          mpls:
+            filter:
+              input: MPLS
+        name: '0'
+    - description: 'branch0-sw0: LAN'
+      flexible_vlan_tagging: null
+      name: ge-0/0/1
+      unit:
+      - description: PC vlan
+        family:
+          inet:
+            address:
+              name: 10.0.10.1/24
+        name: '10'
+        vlan_id: '10'
+      - description: Voice vlan
+        family:
+          inet:
+            address:
+              name: 10.0.20.1/24
+        name: '20'
+        vlan_id: '20'
+      - description: Network vlan
+        family:
+          inet:
+            address:
+              name: 10.0.30.1/24
+        name: '30'
+        vlan_id: '30'
+    - description: 'branch0-sw0: DMZ'
+      flexible_vlan_tagging: null
+      name: ge-0/0/2
+      unit:
+        description: DMZ LAN vlan 90
+        family:
+          inet:
+            address:
+              name: 192.168.90.1/24
+        name: '90'
+        vlan_id: '90'
+    - name: ge-0/0/7
+      unit:
+        family:
+          inet:
+            address:
+              name: 10.6.5.254/24
+        name: '0'
+    - name: fxp0
+      unit:
+        description: out of band interface
+        family:
+          inet:
+            address:
+              name: 192.168.105.200/24
+        name: '0'
+    - name: lo0
+      unit:
+        description: loopback
+        family:
+          inet:
+            address:
+              name: 192.168.255.200/32
+        name: '0'
+    - name: st0
+      unit:
+        description: vpn_tunnel
+        family:
+          inet:
+            address:
+              name: 10.200.200.1/24
+            mtu: '1500'
+        name: '1'
+  policy_options:
+    policy_statement:
+    - name: ECMP
+      term:
+        name: ECMP
+        then:
+          accept: null
+          load_balance:
+            per_packet: null
+    - name: LOOPBACK0
+      term:
+        from:
+          protocol: direct
+          route_filter:
+            address: 192.168.255.1/32
+            exact: null
+        name: lo0_0
+        then:
+          accept: null
+    - name: POLICY_DEFAULT
+      term:
+      - from:
+          route_filter:
+            address: 0.0.0.0/0
+            exact: null
+        name: DEFAULT
+        then:
+          accept: null
+      - name: REJECT
+        then:
+          reject: null
+    - name: POLICY_EXPORT_ROUTER_IPV4
+      term:
+        from:
+          prefix_list:
+            name: PREFIX_ROUTER_IPV4
+        name: ALL_IPV4
+        then:
+          accept: null
+    - name: branch0_lan
+      term:
+        from:
+          route_filter:
+            address: 10.0.0.0/16
+            exact: null
+        name: '1'
+        then:
+          accept: null
+    prefix_list:
+    - name: PREFIX_ALL
+      prefix_list_item:
+        name: 0.0.0.0/0
+    - name: PREFIX_DEFAULT
+      prefix_list_item:
+        name: 0.0.0.0/0
+    - apply_path: interfaces <*> unit <*> family inet address <*>
+      name: PREFIX_ROUTER_IPV4
+    - apply_path: interfaces lo0 unit 0 family inet address <*>
+      name: PREFIX_LOOPBACK_0_IPV4
+    - apply_path: interfaces lo0 unit 1 family inet address <*>
+      name: PREFIX_LOOPBACK_1_IPV4
+  protocols:
+    bgp:
+      group:
+        family:
+          inet_vpn:
+            unicast: null
+        local_address: 192.168.255.200
+        name: mpls_wan
+        neighbor:
+        - name: 192.168.255.210
+        - name: 192.168.255.220
+        type: internal
+    ldp:
+      interface:
+      - name: ge-0/0/0.0
+      - name: lo0.0
+    lldp:
+      interface:
+        name: all
+      port_description_type: interface-alias
+      port_id_subtype: interface-name
+    mpls:
+      interface:
+        name: ge-0/0/0.0
+    ospf:
+      area:
+        interface:
+        - name: lo0.0
+          passive: null
+        - interface_type: p2p
+          name: ge-0/0/0.0
+        name: 0.0.0.0
+      export: POLICY_EXPORT_ROUTER_IPV4
+  routing_instances:
+    instance:
+      access:
+        address_assignment:
+          pool:
+          - family:
+              inet:
+                dhcp_attributes:
+                  domain_name: lonestar.com
+                  name_server:
+                  - name: 1.1.1.1
+                  - name: 8.8.8.8
+                  router:
+                    name: 10.0.10.1
+                host:
+                  hardware_address: 84:03:28:0b:d2:89
+                  ip_address: 10.0.10.254
+                  name: branch0-sw0
+                network: 10.0.10.0/24
+                range:
+                  high: 10.0.10.200
+                  low: 10.0.10.100
+                  name: range10
+            name: pool10
+          - family:
+              inet:
+                dhcp_attributes:
+                  domain_name: lonestar.com
+                  name_server:
+                  - name: 1.1.1.1
+                  - name: 8.8.8.8
+                  router:
+                    name: 10.0.20.1
+                host:
+                  hardware_address: 84:03:28:0b:d2:89
+                  ip_address: 10.0.20.254
+                  name: branch0-sw0
+                network: 10.0.20.0/24
+                range:
+                  high: 10.0.20.200
+                  low: 10.0.20.100
+                  name: range20
+            name: pool20
+          - family:
+              inet:
+                dhcp_attributes:
+                  domain_name: lonestar.com
+                  name_server:
+                  - name: 1.1.1.1
+                  - name: 8.8.8.8
+                  router:
+                    name: 10.0.30.1
+                host:
+                  hardware_address: 84:03:28:0b:d2:89
+                  ip_address: 10.0.30.254
+                  name: branch0-sw0
+                network: 10.0.30.0/24
+                range:
+                  high: 10.0.30.200
+                  low: 10.0.30.100
+                  name: range30
+            name: pool30
+      instance_type: vrf
+      interface:
+      - name: ge-0/0/1.10
+      - name: ge-0/0/1.20
+      - name: ge-0/0/1.30
+      - name: ge-0/0/2.90
+      name: branch0
+      route_distinguisher:
+        rd_type: 192.168.255.200:100
+      system:
+        services:
+          dhcp_local_server:
+            group:
+              interface:
+              - name: ge-0/0/1.10
+              - name: ge-0/0/1.20
+              - name: ge-0/0/1.30
+              name: branch0
+      vrf_table_label: null
+      vrf_target:
+        community: target:65000:100
+  routing_options:
+    autonomous_system:
+      as_number: '65000'
+    forwarding_table:
+      ecmp_fast_reroute: null
+    rib_groups:
+      import_policy: POLICY_DEFAULT
+      import_rib:
+      - inet.0
+      - branch0.inet.0
+      name: inet0_to_branch0
+    router_id: 192.168.255.200
+    static:
+      rib_group: inet0_to_branch0
+      route:
+      - name: 10.9.0.0/17
+        next_hop: 192.168.105.1
+        no_readvertise: null
+      - name: 192.168.101.0/24
+        next_hop: 192.168.105.1
+        no_readvertise: null
+      - name: 192.168.102.0/24
+        next_hop: 192.168.105.1
+        no_readvertise: null
+      - name: 192.168.103.0/24
+        next_hop: 192.168.105.1
+        no_readvertise: null
+      - name: 192.168.104.0/24
+        next_hop: 192.168.105.1
+        no_readvertise: null
+      - name: 0.0.0.0/0
+        next_hop: 10.6.5.1
+  security:
+    address_book:
+      address:
+        ip_prefix: 74.51.192.1/32
+        name: customer1
+      address_set:
+        address:
+          name: customer1
+        name: customers
+      name: global
+    forwarding_options:
+      family:
+        inet6:
+          mode: packet-based
+        mpls:
+          mode: flow-based
+    forwarding_process:
+      enhanced_services_mode: null
+    ike:
+      gateway:
+        address: 74.51.192.1
+        dead_peer_detection:
+          interval: '10'
+          optimized: null
+          threshold: '5'
+        external_interface: ge-0/0/0.0
+        ike_policy: customer1
+        local_identity:
+          hostname:
+            identity_hostname: hoth
+        name: 74_51_192_1_customer1
+        nat_keepalive: '5'
+        version: v1-only
+      policy:
+        mode: aggressive
+        name: customer1
+        pre_shared_key:
+          ascii_text: $9$dxVYoji.F6AevwgoZHkn/9pu1hSevMLIRlv8XVbjikmfQ/9t0Ic9ApOIRyroaZGjk3n9CpBs2H.f5/9O1RhKMWL7bsgLX
+        proposals: customer1-p1
+      proposal:
+        authentication_algorithm: sha1
+        authentication_method: pre-shared-keys
+        dh_group: group2
+        encryption_algorithm: aes-128-cbc
+        lifetime_seconds: '28800'
+        name: customer1-p1
+    ipsec:
+      policy:
+        name: customer1
+        perfect_forward_secrecy:
+          keys: group2
+        proposals: customer1-p2
+      proposal:
+        encryption_algorithm: aes-128-cbc
+        lifetime_kilobytes: '256'
+        lifetime_seconds: '3600'
+        name: customer1-p2
+        protocol: esp
+        undocumented:
+          authentication_algorithm: hmac-sha-256-96
+      vpn:
+        bind_interface: st0.1
+        df_bit: clear
+        establish_tunnels: immediately
+        ike:
+          gateway: 74_51_192_1_customer1
+          idle_time: '60'
+          install_interval: '1'
+          ipsec_policy: customer1
+          no_anti_replay: null
+        name: 74_51_192_1_customer1
+    log:
+      format: sd-syslog
+      mode: stream
+      report: null
+      source_address: 192.168.105.2
+      stream:
+        format: sd-syslog
+        host:
+          ipaddr: 192.168.105.203
+          port: '514'
+        name: log-collector.dmz.home
+        severity: info
+    nat:
+      source:
+        rule_set:
+        - from:
+            zone: trust
+          name: Zone_trust-Zone_internet
+          rule:
+            name: trust-internet
+            src_nat_rule_match:
+              destination_address: 0.0.0.0/0
+              source_address: 0.0.0.0/0
+            then:
+              source_nat:
+                interface: null
+          to:
+            zone: internet
+        - from:
+            zone: mpls_wan
+          name: Zone_mpls-Zone_internet
+          rule:
+            name: mpls-internet
+            src_nat_rule_match:
+              destination_address: 0.0.0.0/0
+              source_address: 0.0.0.0/0
+            then:
+              source_nat:
+                interface: null
+          to:
+            zone: internet
+    policies:
+      policy:
+      - from_zone_name: mpls_wan
+        policy:
+          match:
+            application: any
+            destination_address: any
+            source_address: any
+          name: mpls_wan-mpls_wan
+          then:
+            permit: null
+        to_zone_name: mpls_wan
+      - from_zone_name: trust
+        policy:
+          match:
+            application: any
+            destination_address: any
+            source_address: any
+          name: trust_to_internet
+          then:
+            permit: null
+        to_zone_name: internet
+      - from_zone_name: mpls_wan
+        policy:
+          match:
+            application: any
+            destination_address: any
+            source_address: any
+          name: mpls_to_internet
+          then:
+            permit: null
+        to_zone_name: internet
+      - from_zone_name: trust
+        policy:
+          match:
+            application: any
+            destination_address: any
+            source_address: any
+          name: trust-to-trust
+          then:
+            permit: null
+        to_zone_name: trust
+    screen:
+      ids_option:
+        icmp:
+          ping_death: null
+        ip:
+          source_route_option: null
+          tear_drop: null
+        name: untrust-screen
+        tcp:
+          land: null
+          syn_flood:
+            alarm_threshold: '1024'
+            attack_threshold: '200'
+            destination_threshold: '2048'
+            source_threshold: '1024'
+            timeout: '20'
+    zones:
+      security_zone:
+      - host_inbound_traffic:
+          protocols:
+            name: all
+          system_services:
+            name: all
+        interfaces:
+        - name: ge-0/0/1.10
+        - name: ge-0/0/1.20
+        - name: ge-0/0/1.30
+        name: trust
+      - host_inbound_traffic:
+          protocols:
+            name: all
+          system_services:
+            name: all
+        interfaces:
+        - name: ge-0/0/0.0
+        - name: lo0.0
+        name: mpls_wan
+      - interfaces:
+          host_inbound_traffic:
+            protocols:
+              name: all
+            system_services:
+              name: all
+          name: ge-0/0/7.0
+        name: internet
+  services:
+    application_identification: null
+  snmp:
+    community:
+      authorization: read-only
+      clients:
+      - name: 192.168.105.0/24
+      - name: 0.0.0.0/0
+        restrict: null
+      name: $home_snmp$
+    interface: fxp0.0
+    trap_group:
+      categories:
+        chassis: null
+        configuration: null
+        link: null
+      name: space
+      targets:
+      - name: 192.168.105.201
+      - name: 192.168.105.202
+      version: v2
+    trap_options:
+      source_address:
+        address: 192.168.105.2
+  system:
+    host_name: branch0-fw0
+    login:
+      user:
+        authentication:
+          encrypted_password: $6$ZlA2peEY$803k5QuDxH1YBoHBVObfr0KVLavXLTu8nUlzIUmJbIhrMcQZZ3dWLD7Jj.IK0RKFXMJ6Csf2pnxg8MiuppZHj1
+        class: super-user
+        name: automation
+        uid: '3001'
+    name_server:
+    - name: 192.168.101.11
+    - name: 192.168.101.12
+    root_authentication:
+      encrypted_password: $6$eG4FXiQW$J4/a.5GZlXlrKcvJTpbaMl.qIelPqjR5lFk.POmxo5O3Vp5OdjHFFJ97PMqvABuZZOGXrdvSE6YF3f33wilgO.
+    services:
+      netconf:
+        ssh: null
+      rest:
+        enable_explorer: null
+        http:
+          port: '8080'
+      ssh:
+        root_login: allow
+      web_management:
+        http:
+          interface: fxp0.0
+          port: '8000'
+    syslog:
+      file:
+      - contents:
+        - name: any
+          notice: null
+        - info: null
+          name: authorization
+        name: messages
+      - contents:
+          any: null
+          name: interactive-commands
+        name: interactive-commands
+      - contents:
+          info: null
+          name: any
+        match: (requested 'commit' operation)|(requested 'commit synchronize' operation)|(copying configuration to juniper.save)|(commit complete)|ifAdminStatus|(FRU power)|(FRU removal)|(FRU insertion)|(link UP)|transitioned|Transferred|transfer-file|(license add)|(license delete)|(package -X update)|(package -X delete)|(FRU Online)|(FRU Offline)|(plugged in)|(unplugged)|GRES
+        name: default-log-messages
+        structured_data: null
+      host:
+        contents:
+          any: null
+          name: any
+        name: 192.168.103.31
+        port: '5514'
+        source_address: 192.168.105.2
+        structured_data: null
+      user:
+        contents:
+          emergency: null
+          name: any
+        name: '*'
+    time_zone: America/Chicago
+  version: 19.4R3-S1.3

@@ -1,0 +1,252 @@
+configuration:
+  '@commit_localtime': 2021-02-22 09:58:38 UTC
+  '@commit_seconds': '1613987918'
+  '@commit_user': root
+  apply_groups: phcd_user_script
+  forwarding_options:
+    storm_control_profiles:
+      all: null
+      name: default
+  groups:
+    name: phcd_user_script
+    system:
+      scripts:
+        language: python
+        op:
+          allow_url_for_python: null
+  interfaces:
+    interface:
+    - name: ge-0/0/0
+      unit:
+        family:
+          ethernet_switching:
+            storm_control:
+              profile_name: default
+        name: '0'
+    - name: ge-0/0/1
+      unit:
+        family:
+          ethernet_switching:
+            storm_control:
+              profile_name: default
+        name: '0'
+    - name: ge-0/0/2
+      unit:
+        family:
+          ethernet_switching:
+            storm_control:
+              profile_name: default
+        name: '0'
+    - name: ge-0/0/3
+      unit:
+        family:
+          ethernet_switching:
+            storm_control:
+              profile_name: default
+        name: '0'
+    - name: ge-0/0/4
+      unit:
+        family:
+          ethernet_switching:
+            storm_control:
+              profile_name: default
+        name: '0'
+    - name: ge-0/0/5
+      unit:
+        family:
+          ethernet_switching:
+            storm_control:
+              profile_name: default
+        name: '0'
+    - name: ge-0/0/6
+      unit:
+        family:
+          ethernet_switching:
+            storm_control:
+              profile_name: default
+        name: '0'
+    - name: ge-0/0/7
+      unit:
+        family:
+          ethernet_switching:
+            storm_control:
+              profile_name: default
+        name: '0'
+    - name: ge-0/0/8
+      unit:
+        family:
+          ethernet_switching:
+            storm_control:
+              profile_name: default
+        name: '0'
+    - name: ge-0/0/9
+      unit:
+        family:
+          ethernet_switching:
+            storm_control:
+              profile_name: default
+        name: '0'
+    - name: ge-0/0/10
+      unit:
+        family:
+          ethernet_switching:
+            storm_control:
+              profile_name: default
+        name: '0'
+    - name: ge-0/0/11
+      unit:
+        family:
+          ethernet_switching:
+            storm_control:
+              profile_name: default
+        name: '0'
+    - name: ge-0/1/0
+      unit:
+        family:
+          ethernet_switching:
+            storm_control:
+              profile_name: default
+        name: '0'
+    - name: xe-0/1/0
+      unit:
+        family:
+          ethernet_switching:
+            storm_control:
+              profile_name: default
+        name: '0'
+    - name: ge-0/1/1
+      unit:
+        family:
+          ethernet_switching:
+            storm_control:
+              profile_name: default
+        name: '0'
+    - name: xe-0/1/1
+      unit:
+        family:
+          ethernet_switching:
+            storm_control:
+              profile_name: default
+        name: '0'
+    - name: irb
+      unit:
+        family:
+          inet:
+            dhcp:
+              vendor_id: Juniper:ex2300-c-12p:HV3620270182
+          inet6:
+            dhcpv6_client:
+              client_ia_type:
+                name: ia-na
+              client_identifier:
+                duid_type: duid-ll
+              client_type: stateful
+              vendor_id: Juniper:ex2300-c-12p:HV3620270182
+        name: '0'
+    - name: vme
+      unit:
+        family:
+          inet:
+            address:
+              name: 192.168.105.201/24
+        name: '0'
+  poe:
+    interface:
+      name: all
+  protocols:
+    igmp_snooping:
+      vlan:
+        name: default
+    lldp:
+      interface:
+        name: all
+    lldp_med:
+      interface:
+        name: all
+    router_advertisement:
+      interface:
+      - name: vme.0
+      - name: irb.0
+    rstp:
+      interface:
+      - name: ge-0/0/0
+      - name: ge-0/0/1
+      - name: ge-0/0/2
+      - name: ge-0/0/3
+      - name: ge-0/0/4
+      - name: ge-0/0/5
+      - name: ge-0/0/6
+      - name: ge-0/0/7
+      - name: ge-0/0/8
+      - name: ge-0/0/9
+      - name: ge-0/0/10
+      - name: ge-0/0/11
+      - name: ge-0/1/0
+      - name: xe-0/1/0
+      - name: ge-0/1/1
+      - name: xe-0/1/1
+  routing_options:
+    static:
+      route:
+      - name: 192.168.101.0/24
+        next_hop: 192.168.105.1
+      - name: 192.168.103.0/24
+        next_hop: 192.168.105.1
+      - name: 192.168.104.0/24
+        next_hop: 192.168.105.1
+      - name: 10.9.0.0/16
+        next_hop: 192.168.105.1
+  system:
+    auto_snapshot: null
+    host_name: branch0-sw0
+    login:
+      user:
+        authentication:
+          encrypted_password: $6$RzzqIwVZ$K00pQTiMHaI1iHofcOtfqcIllc0EOZ8.YWNM12o7eivn2U/KX50Rfj3HWxSBif8gQ59dALKBq8/3mvsIAT3Kf0
+        class: super-user
+        name: automation
+        uid: '2002'
+    phone_home:
+      rfc_compliant: null
+      server: https://redirect.juniper.net
+    processes:
+      dhcp_service:
+        traceoptions:
+          file:
+            filename: dhcp_logfile
+            size: 10m
+          flag:
+            name: all
+          level: all
+    root_authentication:
+      encrypted_password: $6$YyaH1Fcp$Eu/z7QD6NB21UoKqCJYtiA.nI6hwWyk54gxUbHVGhWOAi5u6rG.L0gQaa3iqPHpZ.ZbaTCJ5yer5q9AzE81GA0
+    services:
+      netconf:
+        rfc_compliant: null
+        ssh: null
+        yang_compliant: null
+      ssh:
+        root_login: allow
+    syslog:
+      file:
+      - contents:
+        - name: any
+          notice: null
+        - info: null
+          name: authorization
+        name: messages
+      - contents:
+          any: null
+          name: interactive-commands
+        name: interactive-commands
+      user:
+        contents:
+          emergency: null
+          name: any
+        name: '*'
+  version: 20200609.165031.6_builder.r1115480
+  vlans:
+    vlan:
+      l3_interface: irb.0
+      name: default
+      vlan_id: '1'

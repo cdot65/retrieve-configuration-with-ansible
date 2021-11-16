@@ -1,0 +1,45 @@
+---
+### ---------------------------------------------------------------------------
+### DOWNLOAD RUNNING CONFIGURATIONS AND CHANGE THEM TO YAML DATA FORMAT BACKUP
+### ---------------------------------------------------------------------------
+- hosts: all
+  connection: local
+  gather_facts: false
+  tasks:
+    ### -------------------------------------------------
+    ### CREATE BACKUP DIRECTORY
+    ### -------------------------------------------------
+    - name: "directory: create a new backup directory"
+      file:
+        path: "{{ device_backup_directory }}"
+        state: directory
+
+### ---------------------------------------------------------------------------
+### DOWNLOAD RUNNING CONFIGURATIONS AND CHANGE THEM TO YAML DATA FORMAT BACKUP
+### ---------------------------------------------------------------------------
+- hosts: all
+  connection: local
+  roles: 
+    - juniper.junos
+  tasks:
+    ### -------------------------------------------------
+    ### DOWNLOAD CONFIGURATIONS
+    ### -------------------------------------------------
+    - name: "### Retrieving the Juniper configurations as human readable text"
+      juniper_junos_config:
+        retrieve: "committed"
+        format: text
+        diff: false
+        check: false
+        commit: false
+      register: committed
+
+    ### ------------------------------------------------------------
+    ### WRITING CONFIGURATIONS TO FILES
+    ### ------------------------------------------------------------
+    - name: "### Writing Juniper configurations to file"
+      local_action:
+        module: copy
+        content: "{{ committed.config }}"
+        dest: "{{ backup_file }}"
+

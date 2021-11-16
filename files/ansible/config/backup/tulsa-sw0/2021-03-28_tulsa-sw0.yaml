@@ -1,0 +1,150 @@
+configuration:
+  '@commit_localtime': 2021-03-13 01:49:11 UTC
+  '@commit_seconds': '1615600151'
+  '@commit_user': automation
+  chassis:
+    aggregated_devices:
+      ethernet:
+        device_count: '2'
+    redundancy:
+      graceful_switchover: null
+  forwarding_options:
+    storm_control_profiles:
+      all: null
+      name: default
+  interfaces:
+    interface:
+    - name: ge-0/0/11
+      unit:
+        family:
+          ethernet_switching:
+            interface_mode: trunk
+            vlan:
+              members: all
+        name: '0'
+    - name: ge-1/0/11
+      unit:
+        family:
+          ethernet_switching:
+            interface_mode: trunk
+            vlan:
+              members: all
+        name: '0'
+    - name: irb
+      unit:
+      - family:
+          inet:
+            dhcp: null
+        name: '10'
+      - family:
+          inet:
+            dhcp: null
+        name: '20'
+      - family:
+          inet:
+            dhcp: null
+        name: '30'
+    - name: vme
+      unit:
+        family:
+          inet:
+            address:
+              name: 192.168.105.221/24
+        name: '0'
+  protocols:
+    lldp:
+      interface:
+      - name: all
+      - disable: null
+        name: me0
+      port_description_type: interface-alias
+      port_id_subtype: interface-name
+    lldp_med:
+      interface:
+        name: all
+    rstp:
+      interface:
+        name: all
+  routing_options:
+    static:
+      route:
+      - name: 10.9.0.0/16
+        next_hop: 192.168.105.1
+      - name: 192.168.101.0/24
+        next_hop: 192.168.105.1
+      - name: 192.168.103.0/24
+        next_hop: 192.168.105.1
+      - name: 192.168.104.0/24
+        next_hop: 192.168.105.1
+  system:
+    authentication_order: password
+    auto_snapshot: null
+    commit:
+      synchronize: null
+    host_name: tulsa-vc0
+    login:
+      user:
+      - authentication:
+          encrypted_password: $6$oDRV6XtU$jS/Q1mxb2yTXcFFFZXUJaxLXkfxWAglmId6qLdyTU8SH2jzd8g/7b68zaOpcPLQOwuq.FG/exdJS2ca4sE0Cf/
+        class: super-user
+        name: automation
+        uid: '2001'
+      - authentication:
+          encrypted_password: $6$7ZBjyasw$fDEpYmOX8oapXRpEzYILLo2SacdYcI8gcH2ijQFAxGxJp0881GCUNoAlYxrhnCbPfnBA61S4mK73CiwFHNh2M1
+        class: super-user
+        name: packetferret
+        uid: '2000'
+    name_server:
+      name: 1.1.1.1
+    processes:
+      dhcp_service:
+        traceoptions:
+          file:
+            filename: dhcp_logfile
+            size: 10m
+          flag:
+            name: all
+          level: all
+    root_authentication:
+      encrypted_password: $6$cIWSlIWd$7ZUQviI2Rue.qxFV.t2AzbFpdwfK0WMg1QvE7FuTwJLH1W8f5BpRlRmhaZ2H68tc2reXXGD4923C9gkhBzVm8.
+    scripts:
+      language: python
+      synchronize: null
+    services:
+      netconf:
+        rfc_compliant: null
+        ssh: null
+        yang_compliant: null
+      ssh:
+        protocol_version: v2
+    syslog:
+      user:
+        contents:
+          emergency: null
+          name: any
+        name: '*'
+    time_zone: UTC
+  version: 20200609.165031.6_builder.r1115480
+  virtual_chassis:
+    member:
+    - name: '0'
+      role: routing-engine
+      serial_number: HW0218120298
+    - name: '1'
+      role: routing-engine
+      serial_number: HW0218120082
+    preprovisioned: null
+  vlans:
+    vlan:
+    - description: Network vlan
+      l3_interface: irb.30
+      name: Network
+      vlan_id: '30'
+    - description: PC vlan
+      l3_interface: irb.10
+      name: PC
+      vlan_id: '10'
+    - description: Voice vlan
+      l3_interface: irb.20
+      name: Voice
+      vlan_id: '20'

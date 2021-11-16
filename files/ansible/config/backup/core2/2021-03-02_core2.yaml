@@ -1,0 +1,371 @@
+configuration:
+  '@commit_localtime': 2021-03-02 16:18:37 UTC
+  '@commit_seconds': '1614701917'
+  '@commit_user': root
+  chassis:
+    network_services: enhanced-ip
+  interfaces:
+    interface:
+    - name: ge-0/0/1
+      unit:
+        family:
+          inet:
+            address:
+              name: 10.0.0.4/31
+        name: '0'
+    - name: ge-0/0/2
+      unit:
+        family:
+          inet:
+            address:
+              name: 10.0.0.6/31
+        name: '0'
+    - name: fxp0
+      unit:
+        family:
+          inet:
+            address:
+              name: 192.168.105.52/24
+        name: '0'
+    - name: irb
+      unit:
+      - family:
+          inet:
+            address:
+              name: 10.11.10.3/24
+              virtual_gateway_address: 10.11.10.1
+        name: '1100'
+      - family:
+          inet:
+            address:
+              name: 10.12.10.3/24
+              virtual_gateway_address: 10.12.10.1
+        name: '1200'
+      - family:
+          inet:
+            address:
+              name: 10.13.10.3/24
+              virtual_gateway_address: 10.13.10.1
+        name: '1300'
+      - family:
+          inet:
+            address:
+              name: 10.14.10.3/24
+              virtual_gateway_address: 10.14.10.1
+        name: '1400'
+    - name: lo0
+      unit:
+        family:
+          inet:
+            address:
+              name: 10.255.255.102/32
+        name: '0'
+  policy_options:
+    community:
+    - members: target:1:100
+      name: comm-VS_VLAN100
+    - members: target:1:200
+      name: comm-VS_VLAN200
+    - members: target:1:300
+      name: comm-VS_VLAN300
+    - members: target:1:400
+      name: comm-VS_VLAN400
+    - members: target:9999:9999
+      name: comm-leaf_esi
+    policy_statement:
+    - name: VS_VLAN100_IMP
+      term:
+      - from:
+          community: comm-leaf_esi
+        name: ESI
+        then:
+          accept: null
+      - from:
+          community: comm-VS_VLAN100
+        name: VS_VLAN100
+        then:
+          accept: null
+    - name: VS_VLAN200_IMP
+      term:
+      - from:
+          community: comm-leaf_esi
+        name: ESI
+        then:
+          accept: null
+      - from:
+          community: comm-VS_VLAN200
+        name: VS_VLAN200
+        then:
+          accept: null
+    - name: VS_VLAN300_IMP
+      term:
+      - from:
+          community: comm-leaf_esi
+        name: ESI
+        then:
+          accept: null
+      - from:
+          community: comm-VS_VLAN300
+        name: VS_VLAN300
+        then:
+          accept: null
+    - name: VS_VLAN400_IMP
+      term:
+      - from:
+          community: comm-leaf_esi
+        name: ESI
+        then:
+          accept: null
+      - from:
+          community: comm-VS_VLAN400
+        name: VS_VLAN400
+        then:
+          accept: null
+    - from:
+        family: inet
+        protocol: direct
+        route_filter:
+          address: 0.0.0.0/0
+          prefix_length_range: /32-/32
+      name: lo0
+      then:
+        accept: null
+    - name: load-balance
+      term:
+        name: '1'
+        then:
+          load_balance:
+            per_packet: null
+  protocols:
+    bgp:
+      group:
+      - advertise_peer_as: null
+        export: lo0
+        family:
+          inet:
+            unicast:
+              loops:
+                loops: '2'
+        multipath: null
+        name: underlay
+        neighbor:
+        - description: spine-1
+          name: 10.0.0.5
+        - description: spine-2
+          name: 10.0.0.7
+        peer_as: '65401'
+        type: external
+      - family:
+          evpn:
+            signaling: null
+        local_address: 10.255.255.102
+        multipath: null
+        name: EVPN_VXLAN
+        neighbor:
+        - description: leaf-1
+          multihop:
+            ttl: '255'
+          name: 10.255.255.121
+        - description: leaf-2
+          multihop:
+            ttl: '255'
+          name: 10.255.255.122
+        peer_as: '65402'
+        type: external
+    lldp:
+      interface:
+        name: all
+      port_id_subtype: interface-name
+    router_advertisement:
+      interface:
+        name: fxp0.0
+  routing_instances:
+    instance:
+    - instance_type: vrf
+      interface:
+        name: irb.1100
+      name: VRF_Tenant_A
+      route_distinguisher:
+        rd_type: 10.255.255.102:1100
+      routing_options:
+        auto_export: null
+      vrf_target:
+        community: target:10:100
+    - instance_type: vrf
+      interface:
+        name: irb.1200
+      name: VRF_Tenant_B
+      route_distinguisher:
+        rd_type: 10.255.255.102:1200
+      vrf_target:
+        community: target:10:200
+    - instance_type: vrf
+      interface:
+        name: irb.1300
+      name: VRF_Tenant_C
+      route_distinguisher:
+        rd_type: 10.255.255.102:1300
+      vrf_target:
+        community: target:10:300
+    - instance_type: vrf
+      interface:
+        name: irb.1400
+      name: VRF_Tenant_D
+      route_distinguisher:
+        rd_type: 10.255.255.102:1400
+      vrf_target:
+        community: target:10:400
+    - bridge_domains:
+        domain:
+          name: bd1100
+          routing_interface: irb.1100
+          vlan_id: '100'
+          vxlan:
+            ingress_node_replication: null
+            vni: '1100'
+      instance_type: virtual-switch
+      name: VS_VLAN100
+      protocols:
+        evpn:
+          default_gateway: no-gateway-community
+          encapsulation: vxlan
+          extended_vni_list: '1100'
+          multicast_mode: ingress-replication
+      route_distinguisher:
+        rd_type: 10.255.255.102:100
+      vrf_import: VS_VLAN100_IMP
+      vrf_target:
+        community: target:1:100
+      vtep_source_interface:
+        interface_name: lo0.0
+    - bridge_domains:
+        domain:
+          name: bd1200
+          routing_interface: irb.1200
+          vlan_id: '200'
+          vxlan:
+            ingress_node_replication: null
+            vni: '1200'
+      instance_type: virtual-switch
+      name: VS_VLAN200
+      protocols:
+        evpn:
+          encapsulation: vxlan
+          extended_vni_list: '1200'
+          multicast_mode: ingress-replication
+      route_distinguisher:
+        rd_type: 10.255.255.102:200
+      vrf_import: VS_VLAN200_IMP
+      vrf_target:
+        community: target:1:200
+      vtep_source_interface:
+        interface_name: lo0.0
+    - bridge_domains:
+        domain:
+          name: bd1300
+          routing_interface: irb.1300
+          vlan_id: '300'
+          vxlan:
+            ingress_node_replication: null
+            vni: '1300'
+      instance_type: virtual-switch
+      name: VS_VLAN300
+      protocols:
+        evpn:
+          encapsulation: vxlan
+          extended_vni_list: '1300'
+          multicast_mode: ingress-replication
+      route_distinguisher:
+        rd_type: 10.255.255.102:300
+      vrf_import: VS_VLAN300_IMP
+      vrf_target:
+        community: target:1:300
+      vtep_source_interface:
+        interface_name: lo0.0
+    - bridge_domains:
+        domain:
+          name: bd1400
+          routing_interface: irb.1400
+          vlan_id: '400'
+          vxlan:
+            ingress_node_replication: null
+            vni: '1400'
+      instance_type: virtual-switch
+      name: VS_VLAN400
+      protocols:
+        evpn:
+          encapsulation: vxlan
+          extended_vni_list: '1400'
+          multicast_mode: ingress-replication
+      route_distinguisher:
+        rd_type: 10.255.255.102:400
+      vrf_import: VS_VLAN400_IMP
+      vrf_target:
+        community: target:1:400
+      vtep_source_interface:
+        interface_name: lo0.0
+  routing_options:
+    autonomous_system:
+      as_number: '65400'
+    forwarding_table:
+      ecmp_fast_reroute: null
+      export: load-balance
+    router_id: 10.255.255.102
+    static:
+      route:
+      - name: 10.9.0.0/17
+        next_hop: 192.168.105.1
+        no_readvertise: null
+      - name: 192.168.101.0/24
+        next_hop: 192.168.105.1
+        no_readvertise: null
+      - name: 192.168.103.0/24
+        next_hop: 192.168.105.1
+        no_readvertise: null
+      - name: 192.168.104.0/24
+        next_hop: 192.168.105.1
+        no_readvertise: null
+  system:
+    host_name: core-2
+    login:
+      user:
+        authentication:
+          encrypted_password: $6$ZTX3yUw7$FTSrv2.iO6/4I97SNcTQ3NtZxT6N.Bt7K2Um3pNOEw7r3v9kNBWMrEdOKaNGhTZzz6M4w1t/EVDEj6IEoRB.A0
+        class: super-user
+        name: automation
+        uid: '3001'
+    processes:
+      dhcp_service:
+        traceoptions:
+          file:
+            filename: dhcp_logfile
+            size: 10m
+          flag:
+            name: packet
+          level: all
+    root_authentication:
+      encrypted_password: $6$hRaxtbAR$tkx7hR2MSc/3nboE5zb6AZKuhRPcK.b4xSDwD3A1aoBtDif5HNKLTEdWvJUwMvOyK/i1Sar4MyOtDvfbiZJ09/
+    services:
+      netconf:
+        ssh: null
+      ssh:
+        log_key_changes: null
+        root_login: allow
+    syslog:
+      file:
+      - contents:
+        - name: any
+          notice: null
+        - info: null
+          name: authorization
+        name: messages
+      - contents:
+          any: null
+          name: interactive-commands
+        name: interactive-commands
+      user:
+        contents:
+          emergency: null
+          name: any
+        name: '*'
+  version: 20200609.165031.6_builder.r1115480

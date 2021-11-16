@@ -1,0 +1,145 @@
+configuration:
+  '@commit_localtime': 2021-03-21 20:58:59 UTC
+  '@commit_seconds': '1616360339'
+  '@commit_user': automation
+  interfaces:
+    interface:
+    - name: ge-0/0/0
+      unit:
+        family:
+          inet:
+            address:
+              name: 10.1.2.2/24
+          iso: null
+          mpls: null
+        name: '0'
+    - name: ge-0/0/2
+      unit:
+        family:
+          inet:
+            address:
+              name: 10.2.11.2/24
+          iso: null
+          mpls: null
+        name: '0'
+    - name: ge-0/0/4
+      unit:
+        family:
+          inet:
+            address:
+              name: 10.2.13.2/24
+          iso: null
+          mpls: null
+        name: '0'
+    - name: fxp0
+      unit:
+        family:
+          inet:
+            address:
+              name: 192.168.105.21/24
+        name: '0'
+    - name: lo0
+      unit:
+        family:
+          inet:
+            address:
+              name: 192.168.255.2/32
+          iso:
+            address:
+              name: 49.0001.0192.0168.0255.0002.00
+        name: '0'
+  protocols:
+    isis:
+      interface:
+      - name: ge-0/0/0.0
+      - name: ge-0/0/2.0
+      - name: ge-0/0/3.0
+      - name: ge-0/0/4.0
+      - name: ge-0/0/5.0
+      - name: lo0.0
+      level:
+        disable: null
+        name: '1'
+    lldp:
+      interface:
+        name: all
+    mpls:
+      interface:
+      - name: all
+      - disable: null
+        name: fxp0.0
+    router_advertisement:
+      interface:
+        name: fxp0.0
+    rsvp:
+      interface:
+      - name: ge-0/0/0.0
+      - name: ge-0/0/2.0
+      - name: ge-0/0/3.0
+      - name: ge-0/0/4.0
+      - name: ge-0/0/5.0
+      - name: lo0.0
+  routing_options:
+    autonomous_system:
+      as_number: '65000'
+    router_id: 192.168.255.2
+    static:
+      route:
+      - name: 192.168.101.0/24
+        next_hop: 192.168.105.1
+        no_readvertise: null
+      - name: 192.168.102.0/24
+        next_hop: 192.168.105.1
+        no_readvertise: null
+      - name: 192.168.103.0/24
+        next_hop: 192.168.105.1
+        no_readvertise: null
+      - name: 192.168.104.0/24
+        next_hop: 192.168.105.1
+        no_readvertise: null
+      - name: 10.9.0.0/16
+        next_hop: 192.168.105.1
+        no_readvertise: null
+  system:
+    host_name: lonestar-p2
+    login:
+      user:
+        authentication:
+          encrypted_password: $6$qlSTIBin$oDZ1gsR1z8zV/yXuyW5Osn4jgvQzZIir5NnIYKyiOg9CzwXbvWmJHNZNgtU2KzNsoTsTX8G0AFVokhfqyWFYw1
+        class: super-user
+        name: automation
+        uid: '2000'
+    processes:
+      dhcp_service:
+        traceoptions:
+          file:
+            filename: dhcp_logfile
+            size: 10m
+          flag:
+            name: packet
+          level: all
+    root_authentication:
+      encrypted_password: $6$fyb4w7En$Ko3Z6Rb1mNQ0ruwNNn4npbYz23OBRwR5rq2AeHqTeGRV52pKEZZq0mwbjx851iEtfyc.O0ftzvz.e7cJN1wsA.
+    services:
+      netconf:
+        ssh: null
+      ssh:
+        root_login: allow
+    syslog:
+      file:
+      - contents:
+        - name: any
+          notice: null
+        - info: null
+          name: authorization
+        name: messages
+      - contents:
+          any: null
+          name: interactive-commands
+        name: interactive-commands
+      user:
+        contents:
+          emergency: null
+          name: any
+        name: '*'
+  version: 20200609.165031.6_builder.r1115480

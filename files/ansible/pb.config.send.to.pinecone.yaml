@@ -1,0 +1,88 @@
+---
+### ---------------------------------------------------------------------------
+### DOWNLOAD RUNNING CONFIGURATIONS FROM OUR DEVICES
+### ---------------------------------------------------------------------------
+- hosts: all
+  connection: local
+  roles: 
+    - juniper.junos
+  tasks:
+    ### -------------------------------------------------
+    ### CREATE BACKUP DIRECTORY
+    ### -------------------------------------------------
+    - name: "directory: create a new backup directory"
+      file:
+        path: "{{ device_backup_directory }}"
+        state: directory
+
+    ### -------------------------------------------------
+    ### DOWNLOAD CONFIGURATIONS
+    ### -------------------------------------------------
+    - name: "### Retrieving the configuration as XML"
+      juniper_junos_config:
+        user: "automation"
+        passwd: "juniper123"
+        retrieve: committed
+        format: "xml"
+      register: config_xml
+    
+    - name: "### Retrieving the configuration as text"
+      juniper_junos_config:
+        user: "automation"
+        passwd: "juniper123"
+        retrieve: committed
+        format: "text"
+      register: config_text
+
+    - name: "### Retrieving the configuration as set"
+      juniper_junos_config:
+        user: "automation"
+        passwd: "juniper123"
+        retrieve: committed
+        format: "set"
+      register: config_set
+
+    ### ------------------------------------------------------------
+    ### SAVING CONFIGURATIONS AS A VARIABLE TO BE USED LATER ON
+    ### ------------------------------------------------------------
+
+    - name: "### Parsing the XML configuration files as JSON, storing as content"
+      set_fact:
+        content: "{{ config_xml.config | xml_to_json }}"
+
+    - name: '### Replacing instances of "-" with "_" in JSON keys'
+      set_fact:
+        clean_json: "{{ content | hyphen_to_underscore }}"
+
+    ### ------------------------------------------------------------
+    ### DELETE PREVIOUS CONFIGS
+    ### ------------------------------------------------------------
+    - name: "### DELETE to Pinecone"
+      uri:
+        url: "http://{{ api_baseurl }}/delete/"
+        method: DELETE
+        headers:
+          authorization: "Token {{ api_token }}"
+        status_code: 204
+      run_once: true
+
+    ### ------------------------------------------------------------
+    ### WRITING CONFIGURATIONS TO FILES
+    ### ------------------------------------------------------------
+    - name: "### POST to Pinecone"
+      uri:
+        url: "http://{{ api_baseurl }}/backups/"
+        method: POST
+        headers:
+          authorization: "Token {{ api_token }}"
+        body:
+          hostname: "{{ inventory_hostname }}"
+          config_set: "{{ config_set.config | string }}"
+          config_text: "{{ config_text.config | string }}"
+          config_json: "{{ clean_json | to_nice_json  }}"
+          linenos: true
+          language: "json"
+          style: "monokai"
+        # force_basic_auth: yes
+        status_code: 201
+        body_format: json

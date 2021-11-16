@@ -1,0 +1,271 @@
+configuration:
+  '@commit_localtime': 2021-03-18 19:25:56 CDT
+  '@commit_seconds': '1616113556'
+  '@commit_user': automation
+  chassis:
+    aggregated_devices:
+      ethernet:
+        device_count: '64'
+  groups:
+  - interfaces:
+      interface:
+        mtu: '9192'
+        name: <*>
+    name: AE_MTU_JUMBO
+  - interfaces:
+      interface:
+        aggregated_ether_options:
+          lacp:
+            active: null
+            periodic: slow
+        name: <*>
+    name: AE_LACP_BOND
+  interfaces:
+    interface:
+    - description: '[xe-0/0/3] to dc1-spine1'
+      name: xe-0/0/3
+      unit:
+        family:
+          inet:
+            address:
+              name: 172.16.1.7/31
+        name: '0'
+    - description: '[xe-0/0/4] to dc1-spine2'
+      name: xe-0/0/4
+      unit:
+        family:
+          inet:
+            address:
+              name: 172.16.2.7/31
+        name: '0'
+    - description: '[xe-0/0/10] to pc4 (access vlan VNI_40000)'
+      name: xe-0/0/10
+      unit:
+        family:
+          ethernet_switching:
+            interface_mode: access
+            vlan:
+              members: VNI_40000
+        name: '0'
+    - name: em0
+      unit:
+        description: out of band interface
+        family:
+          inet:
+            address:
+              name: 192.168.105.16/24
+        name: '0'
+    - name: em1
+      unit:
+        family:
+          inet:
+            address:
+              name: 169.254.0.2/24
+        name: '0'
+    - name: lo0
+      unit:
+        description: loopback0 interface
+        family:
+          inet:
+            address:
+              name: 192.168.1.14/32
+              primary: null
+        name: '0'
+  policy_options:
+    policy_statement:
+    - name: BGP_LOOPBACK0
+      term:
+        from:
+          protocol: direct
+          route_filter:
+            address: 192.168.1.14/32
+            exact: null
+        name: TERM1
+        then:
+          accept: null
+    - name: PFE_ECMP
+      term:
+        name: LOAD_BALANCE
+        then:
+          accept: null
+          load_balance:
+            per_packet: null
+  protocols:
+    bgp:
+      group:
+      - export: BGP_LOOPBACK0
+        family:
+          inet:
+            unicast: null
+        hold_time: '10'
+        local_as:
+          as_number: '65014'
+        multipath:
+          multiple_as: null
+        name: UNDERLAY
+        neighbor:
+        - description: 'underlay: dc1-spine1'
+          name: 172.16.1.6
+          peer_as: '65001'
+        - description: 'underlay: dc1-spine2'
+          name: 172.16.2.6
+          peer_as: '65002'
+        type: external
+      - family:
+          evpn:
+            signaling: null
+        local_address: 192.168.1.14
+        name: OVERLAY
+        neighbor:
+        - description: 'overlay: dc1-spine1'
+          name: 192.168.0.1
+        - description: 'overlay: dc1-spine2'
+          name: 192.168.0.2
+        type: internal
+    evpn:
+      encapsulation: vxlan
+      extended_vni_list: all
+    lldp:
+      interface:
+      - name: all
+      - disable: null
+        name: em0
+      port_description_type: interface-alias
+      port_id_subtype: interface-name
+  routing_options:
+    autonomous_system:
+      as_number: '65100'
+    forwarding_table:
+      ecmp_fast_reroute: null
+      export: PFE_ECMP
+    router_id: 192.168.1.14
+    static:
+      route:
+      - name: 10.9.0.0/17
+        next_hop: 192.168.105.1
+        no_readvertise: null
+      - name: 192.168.101.0/24
+        next_hop: 192.168.105.1
+        no_readvertise: null
+      - name: 192.168.102.0/24
+        next_hop: 192.168.105.1
+        no_readvertise: null
+      - name: 192.168.103.0/24
+        next_hop: 192.168.105.1
+        no_readvertise: null
+      - name: 192.168.104.0/24
+        next_hop: 192.168.105.1
+        no_readvertise: null
+  snmp:
+    community:
+      authorization: read-only
+      clients:
+      - name: 192.168.105.0/24
+      - name: 0.0.0.0/0
+        restrict: null
+      name: $home_snmp$
+    interface: em0.0
+    trap_group:
+      categories:
+        chassis: null
+        routing: null
+      name: SNMP_TRAP
+      targets:
+        name: 192.168.105.202
+      version: v2
+    trap_options:
+      source_address:
+        address: 192.168.105.16
+  switch_options:
+    route_distinguisher:
+      rd_type: 192.168.1.14:1
+    vrf_target:
+      auto: null
+      community: target:65100:1111
+    vtep_source_interface:
+      interface_name: lo0.0
+  system:
+    host_name: dallas-leaf4
+    login:
+      user:
+        authentication:
+          encrypted_password: $6$ZlA2peEY$803k5QuDxH1YBoHBVObfr0KVLavXLTu8nUlzIUmJbIhrMcQZZ3dWLD7Jj.IK0RKFXMJ6Csf2pnxg8MiuppZHj1
+        class: super-user
+        name: automation
+        uid: '3001'
+    name_server:
+    - name: 192.168.101.11
+    - name: 192.168.101.12
+    root_authentication:
+      encrypted_password: $6$eG4FXiQW$J4/a.5GZlXlrKcvJTpbaMl.qIelPqjR5lFk.POmxo5O3Vp5OdjHFFJ97PMqvABuZZOGXrdvSE6YF3f33wilgO.
+    services:
+      netconf:
+        ssh: null
+      rest:
+        enable_explorer: null
+        http:
+          port: '8080'
+      ssh:
+        root_login: allow
+    syslog:
+      file:
+      - contents:
+        - name: any
+          notice: null
+        - info: null
+          name: authorization
+        name: messages
+      - contents:
+          any: null
+          name: interactive-commands
+        name: interactive-commands
+      - contents:
+          info: null
+          name: any
+        match: (requested 'commit' operation)|(requested 'commit synchronize' operation)|(copying configuration to juniper.save)|(commit complete)|ifAdminStatus|(FRU power)|(FRU removal)|(FRU insertion)|(link UP)|transitioned|Transferred|transfer-file|(license add)|(license delete)|(package -X update)|(package -X delete)|(FRU Online)|(FRU Offline)|(plugged in)|(unplugged)|GRES
+        name: default-log-messages
+        structured_data: null
+      host:
+      - contents:
+          any: null
+          name: any
+        name: 192.168.105.80
+        port: '5514'
+        source_address: 192.168.105.16
+        structured_data: null
+      - contents:
+          any: null
+          name: any
+        name: 192.168.105.77
+        port: '514'
+        source_address: 192.168.105.16
+        structured_data: null
+      user:
+        contents:
+          emergency: null
+          name: any
+        name: '*'
+    time_zone: America/Chicago
+  version: 18.4R2.7
+  vlans:
+    vlan:
+    - description: data network
+      name: VNI_10000
+      vlan_id: '100'
+      vxlan:
+        vni: '10000'
+    - description: voice network
+      name: VNI_20000
+      vlan_id: '200'
+      vxlan:
+        vni: '20000'
+    - description: guest network
+      name: VNI_30000
+      vlan_id: '300'
+      vxlan:
+        vni: '30000'
+    - description: oob network
+      name: VNI_40000
+      vlan_id: '400'
+      vxlan:
+        vni: '40000'

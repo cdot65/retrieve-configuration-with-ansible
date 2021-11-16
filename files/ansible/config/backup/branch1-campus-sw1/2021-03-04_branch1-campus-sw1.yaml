@@ -1,0 +1,198 @@
+configuration:
+  '@commit_localtime': 2021-02-27 18:46:15 UTC
+  '@commit_seconds': '1614451575'
+  '@commit_user': root
+  chassis:
+    aggregated_devices:
+      ethernet:
+        device_count: '5'
+  forwarding_options:
+    storm_control_profiles:
+      all: null
+      name: default
+  interfaces:
+    interface:
+    - ether_options:
+        ieee_802.3ad:
+          bundle: ae1
+      name: xe-0/0/0
+    - name: xe-0/0/9
+      unit:
+        family:
+          ethernet_switching:
+            interface_mode: access
+            vlan:
+              members: v10
+        name: '0'
+    - ether_options:
+        ieee_802.3ad:
+          bundle: ae0
+      name: xe-0/0/10
+    - ether_options:
+        ieee_802.3ad:
+          bundle: ae0
+      name: xe-0/0/11
+    - aggregated_ether_options:
+        lacp:
+          active: null
+      name: ae0
+      unit:
+        family:
+          ethernet_switching:
+            interface_mode: trunk
+            vlan:
+              members:
+              - v10
+              - v50
+        name: '0'
+    - aggregated_ether_options:
+        lacp:
+          active: null
+          admin_key: '3'
+          system_id: 00:01:02:03:04:05
+        mc_ae:
+          chassis_id: '0'
+          init_delay_time: '240'
+          mc_ae_id: '3'
+          mode: active-active
+          redundancy_group: '1'
+          status_control: active
+      name: ae1
+      unit:
+        family:
+          ethernet_switching:
+            interface_mode: trunk
+            vlan:
+              members: v10
+        name: '0'
+    - name: em0
+      unit:
+        family:
+          inet:
+            address:
+              name: 192.168.105.21/24
+        name: '0'
+    - name: em1
+      unit:
+        family:
+          inet:
+            address:
+              name: 169.254.0.2/24
+        name: '0'
+    - name: irb
+      unit:
+      - family:
+          inet:
+            address:
+              name: 10.10.1.1/24
+        name: '10'
+      - family:
+          inet:
+            address:
+              name: 10.50.1.1/30
+        name: '50'
+  multi_chassis:
+    multi_chassis_protection:
+      interface: ae0
+      name: 10.50.1.2
+  protocols:
+    iccp:
+      local_ip_addr: 10.50.1.1
+      peer:
+        backup_liveness_detection:
+          backup_peer_ip: 192.168.105.22
+        liveness_detection:
+          minimum_interval: '100000'
+          multiplier: '100'
+        name: 10.50.1.2
+        redundancy_group_id_list: '1'
+        session_establishment_hold_time: '340'
+    igmp_snooping:
+      vlan:
+        name: default
+    lldp:
+      interface:
+        name: all
+    rstp:
+      interface:
+        disable: null
+        name: ae0
+  routing_options:
+    static:
+      route:
+      - name: 10.9.0.0/16
+        next_hop: 192.168.105.1
+      - name: 192.168.101.0/24
+        next_hop: 192.168.105.1
+      - name: 192.168.103.0/24
+        next_hop: 192.168.105.1
+      - name: 192.168.104.0/24
+        next_hop: 192.168.105.1
+  switch_options:
+    service_id: '10'
+  system:
+    extensions:
+      providers:
+      - license_type:
+          deployment_scope: commercial
+          name: juniper
+        name: juniper
+      - license_type:
+          deployment_scope: commercial
+          name: juniper
+        name: chef
+    host_name: branch1-campus-sw1
+    login:
+      user:
+      - authentication:
+          encrypted_password: $6$9rWpDbZX$wYg0mXXqCzkO9hfQdxIset51JUeT.7zla5.GfsEsGc7SqLAAt6yFetrqBmGRUhleX36pi0O2YEa0bJBNbnt6b0
+        class: super-user
+        name: automation
+        uid: '2001'
+      - authentication:
+          ssh_rsa:
+            name: ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEA6NF8iallvQVp22WDkTkyrtvp9eWW6A8YVr+kz4TjGYe7gHzIw+niNltGEFHzD8+v1I2YJ6oXevct1YeS0o9HZyN1Q9qgCgzUFtdOKLv6IedplqoPkcmF0aYet2PkEDo3MlTBckFXPITAMzF8dJSIFo9D8HfdOV0IAdx4O7PtixWKn5y2hMNG0zQPyUecp4pzC6kivAIhyfHilFR61RGL+GPXQ2MWZWFYbAGjyiYJnAmCP3NOTd0jMZEnDkbUvxhMmBYSdETk1rRgm+R4LOzFUGaHqHDLKLX+FIPKcF96hrucXzcWyLbIbEgE98OHlnVYCzRdK8jlqm8tehUc9c9WhQ== vagrant insecure public key
+        class: super-user
+        name: vagrant
+        uid: '2000'
+    root_authentication:
+      encrypted_password: $6$JutCvTmx$/Uc.aOJMhV3cDu8AHyjA8zzDhgoJA0DOubf0q69inN71rVPb6Z1NxX0QATuj2kgd8AE5KG.lDlzFRkNzHH5VG1
+      ssh_rsa:
+        name: ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEA6NF8iallvQVp22WDkTkyrtvp9eWW6A8YVr+kz4TjGYe7gHzIw+niNltGEFHzD8+v1I2YJ6oXevct1YeS0o9HZyN1Q9qgCgzUFtdOKLv6IedplqoPkcmF0aYet2PkEDo3MlTBckFXPITAMzF8dJSIFo9D8HfdOV0IAdx4O7PtixWKn5y2hMNG0zQPyUecp4pzC6kivAIhyfHilFR61RGL+GPXQ2MWZWFYbAGjyiYJnAmCP3NOTd0jMZEnDkbUvxhMmBYSdETk1rRgm+R4LOzFUGaHqHDLKLX+FIPKcF96hrucXzcWyLbIbEgE98OHlnVYCzRdK8jlqm8tehUc9c9WhQ== vagrant insecure public key
+    services:
+      netconf:
+        ssh: null
+      rest:
+        enable_explorer: null
+        http:
+          port: '8080'
+      ssh:
+        root_login: allow
+    syslog:
+      file:
+      - contents:
+        - name: any
+          notice: null
+        - info: null
+          name: authorization
+        name: messages
+      - contents:
+          any: null
+          name: interactive-commands
+        name: interactive-commands
+      user:
+        contents:
+          emergency: null
+          name: any
+        name: '*'
+  version: 20191212.201431_builder.r1074901
+  vlans:
+    vlan:
+    - name: default
+      vlan_id: '1'
+    - l3_interface: irb.10
+      name: v10
+      vlan_id: '10'
+    - l3_interface: irb.50
+      name: v50
+      vlan_id: '50'

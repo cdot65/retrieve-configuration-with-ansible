@@ -1,0 +1,57 @@
+---
+### ---------------------------------------------------------------------------
+### DOWNLOAD RUNNING CONFIGURATIONS FROM OUR DEVICES
+### ---------------------------------------------------------------------------
+- hosts: all
+  connection: local
+  roles: 
+    - juniper.junos
+  tasks:
+    ### -------------------------------------------------
+    ### CREATE BACKUP DIRECTORY
+    ### -------------------------------------------------
+    - name: "directory: create a new backup directory"
+      file:
+        path: "{{ device_backup_directory }}"
+        state: directory
+
+    ### -------------------------------------------------
+    ### DOWNLOAD CONFIGURATIONS
+    ### -------------------------------------------------
+    - name: "### Retrieving the configuration as XML"
+      juniper_junos_config:
+        retrieve: committed
+        format: "xml"
+      register: response
+
+    ### ------------------------------------------------------------
+    ### SAVING CONFIGURATIONS AS A VARIABLE TO BE USED LATER ON
+    ### ------------------------------------------------------------
+
+    - name: "### Parsing the XML configuration files as JSON, storing as content"
+      set_fact:
+        content: "{{ response.config | xml_to_json }}"
+
+    - name: '### Replacing instances of "-" with "_" in JSON keys'
+      set_fact:
+        clean_json: "{{ content | hyphen_to_underscore }}"
+
+    ### ------------------------------------------------------------
+    ### WRITING CONFIGURATIONS TO FILES
+    ### ------------------------------------------------------------
+    - name: "### Writing configuration to file"
+      local_action:
+        module: copy
+        content: "{{ clean_json | to_nice_yaml(indent=2, width=1337) }}"
+        dest: "{{ backup_file_yaml }}"
+
+    ### ------------------------------------------------------------
+    ### PRINT VARS TO CONSOLE
+    ### ------------------------------------------------------------
+    - name: Display resolv.conf contents
+      command: "cat {{ backup_file_yaml }}"
+      register: command_output
+
+    - name: Print to console
+      debug:
+        msg: "{{command_output.stdout}}"
